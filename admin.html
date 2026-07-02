@@ -62,7 +62,7 @@
         <div class="card" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
-              <span class="badge badge-pending" style="margin-bottom: 0.5rem;">${ev.category}</span>
+              <span class="badge badge-cat-${ev.category.toLowerCase()}" style="margin-bottom: 0.5rem;">${ev.category}</span>
               <h3 style="font-size: 1.125rem; font-weight: 700;">${ev.title}</h3>
               <div style="font-size: 0.875rem; color: var(--gray-500); margin-top: 0.25rem;">
                 By ${ev.requested_by_name || 'Unknown'} &bull; ${ev.venue} &bull; ${ev.event_date}

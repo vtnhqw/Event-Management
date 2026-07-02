@@ -99,6 +99,7 @@
         hero.innerHTML = `<img src="${currentEvent.image_url}" alt="Hero">`;
       }
 
+      document.getElementById('event-category').className = `badge badge-cat-${currentEvent.category.toLowerCase()}`;
       document.getElementById('event-category').textContent = currentEvent.category;
       document.getElementById('event-title').textContent = currentEvent.title;
       
