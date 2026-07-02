@@ -2,31 +2,48 @@
 const SEED_EVENTS = [
   {
     id: '1',
-    title: 'UNITEN Tech Hackathon 2024',
+    title: 'UNITEN Tech Hackathon 2026',
     category: 'Competition',
     description: 'Join the biggest 24-hour coding competition at UNITEN. Build innovative solutions for campus sustainability.',
-    event_date: '2024-08-15',
+    event_date: '2026-07-15',
     start_time: '09:00',
     end_time: '18:00',
     venue: 'COIT Lab 1 & 2',
     image_url: 'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&q=80&w=800',
     requested_by_name: 'Tech Club',
     status: 'approved',
-    registrations: 45
+    registrations: 45,
+    scorun: 4
   },
   {
     id: '2',
     title: 'Resume Building & Interview Skills Workshop',
     category: 'Workshop',
     description: 'Prepare for your internship! Learn how to craft a standout resume and ace your technical interviews with industry experts.',
-    event_date: '2024-07-20',
+    event_date: '2026-07-22',
     start_time: '14:00',
     end_time: '16:00',
     venue: 'Library Auditorium',
     image_url: 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=800',
     requested_by_name: 'Career Center',
     status: 'approved',
-    registrations: 120
+    registrations: 120,
+    scorun: 2
+  },
+  {
+    id: '3',
+    title: 'Campus Mental Wellness Talk',
+    category: 'Talk',
+    description: 'A candid conversation about student mental health, stress management, and building resilience during exam season.',
+    event_date: '2026-07-28',
+    start_time: '10:00',
+    end_time: '11:30',
+    venue: 'Dewan Utama',
+    image_url: 'https://images.unsplash.com/photo-1573497019418-b400bb3ab074?auto=format&fit=crop&q=80&w=800',
+    requested_by_name: 'Student Welfare Office',
+    status: 'approved',
+    registrations: 78,
+    scorun: 0
   }
 ];
 
@@ -43,6 +60,7 @@ const TRANSLATIONS = {
     my_events_title: "My Events", my_events_sub: "Track the status of your submissions", btn_submit_new: "Submit New Event",
     submit_title: "Submit Event", submit_sub: "Fill in the details for your event. It will be reviewed by an admin.",
     lbl_title: "Event Title", lbl_category: "Category", lbl_desc: "Description", lbl_date: "Date", lbl_venue: "Venue", lbl_start: "Start Time", lbl_end: "End Time", lbl_image: "Image URL (Optional)", btn_submit_approval: "Submit for Approval",
+    lbl_location_type: "Location Type", loc_physical: "Physical", loc_online: "Online", lbl_platform: "Online Platform", platform_other: "Other",
     filter_month_all: "All Months", month_01: "January", month_02: "February", month_03: "March", month_04: "April", month_05: "May", month_06: "June", month_07: "July", month_08: "August", month_09: "September", month_10: "October", month_11: "November", month_12: "December"
   },
   ms: {
@@ -57,6 +75,7 @@ const TRANSLATIONS = {
     my_events_title: "Acara Saya", my_events_sub: "Jejak status penyertaan anda", btn_submit_new: "Hantar Acara Baru",
     submit_title: "Hantar Acara", submit_sub: "Isi butiran acara anda. Ia akan disemak oleh admin.",
     lbl_title: "Tajuk Acara", lbl_category: "Kategori", lbl_desc: "Penerangan", lbl_date: "Tarikh", lbl_venue: "Tempat", lbl_start: "Masa Mula", lbl_end: "Masa Tamat", lbl_image: "URL Imej (Pilihan)", btn_submit_approval: "Hantar untuk Kelulusan",
+    lbl_location_type: "Jenis Lokasi", loc_physical: "Fizikal", loc_online: "Dalam Talian", lbl_platform: "Platform Dalam Talian", platform_other: "Lain-lain",
     filter_month_all: "Semua Bulan", month_01: "Januari", month_02: "Februari", month_03: "Mac", month_04: "April", month_05: "Mei", month_06: "Jun", month_07: "Julai", month_08: "Ogos", month_09: "September", month_10: "Oktober", month_11: "November", month_12: "Disember"
   }
 };
@@ -66,8 +85,14 @@ let isDarkMode = localStorage.getItem('uni_theme') === 'dark';
 let currentLang = localStorage.getItem('uni_lang') || 'en';
 
 function applyTheme() {
-  if (isDarkMode) document.body.classList.add('dark-mode');
-  else document.body.classList.remove('dark-mode');
+  const isDark = localStorage.getItem('uni_theme') === 'dark';
+  if (isDark) {
+    document.documentElement.classList.add('dark-mode');
+    document.body.classList.add('dark-mode');
+  } else {
+    document.documentElement.classList.remove('dark-mode');
+    document.body.classList.remove('dark-mode');
+  }
 }
 
 function applyLang() {
@@ -109,9 +134,31 @@ function toggleLang() {
   if(typeof renderEvent === 'function' && document.getElementById('event-content')) renderEvent();
 }
 
+function safeParseJSON(key, fallback) {
+  try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); }
+  catch(e) { localStorage.removeItem(key); return fallback; }
+}
+
 function initDB() {
-  if (!localStorage.getItem('uni_events')) localStorage.setItem('uni_events', JSON.stringify(SEED_EVENTS));
-  if (!localStorage.getItem('uni_rsvps')) localStorage.setItem('uni_rsvps', JSON.stringify([]));
+  if (!localStorage.getItem('uni_events')) {
+    localStorage.setItem('uni_events', JSON.stringify(SEED_EVENTS));
+  } else {
+    // Migrate old events
+    let events = safeParseJSON('uni_events', []);
+    let updated = false;
+    events.forEach(ev => {
+      if (typeof ev.scorun === 'undefined') {
+        const seed = SEED_EVENTS.find(s => s.id === ev.id);
+        ev.scorun = seed ? seed.scorun : 0;
+        updated = true;
+      }
+    });
+    if (updated) localStorage.setItem('uni_events', JSON.stringify(events));
+  }
+  
+  if (!localStorage.getItem('uni_rsvps')) {
+    localStorage.setItem('uni_rsvps', JSON.stringify([]));
+  }
 }
 
 function showToast(message) {

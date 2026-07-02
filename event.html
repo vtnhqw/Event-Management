@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <script>if(localStorage.getItem('uni_theme')==='dark') document.documentElement.classList.add('dark-mode');</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>UNIEvent</title>
   <link rel="stylesheet" href="style.css">
@@ -13,43 +14,59 @@
       <div id="event-loading" class="loading">Loading event details...</div>
       
       <div id="event-content" class="hidden">
+        <!-- Back navigation -->
+        <a href="index.html" class="back-link">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          Back to Events
+        </a>
+
         <div class="hero" id="event-hero"></div>
         
-        <div style="margin-bottom: 2rem;">
-          <span class="badge badge-approved" id="event-category" style="margin-bottom: 1rem;"></span>
-          <h1 class="title" id="event-title"></h1>
+        <div style="margin-bottom: 1.5rem;">
+          <div style="display: flex; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
+            <span class="badge" id="event-category"></span>
+            <span class="badge hidden" id="event-scorun" style="background: var(--accent-glow); color: var(--accent); font-weight: 700;"></span>
+          </div>
+          <h1 class="title" id="event-title" style="line-height: 1.2;"></h1>
         </div>
 
-        <div class="card" style="padding: 1.5rem; margin-bottom: 2rem; background: var(--card-bg);">
-          <div style="display: flex; flex-direction: column; gap: 1rem;">
-            <div style="display: flex; align-items: center; gap: 1rem;">
-              <div style="width: 40px; height: 40px; border-radius: 0.5rem; background: var(--hover-bg); display: flex; align-items: center; justify-content: center; color: var(--text-main);">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-              </div>
-              <div>
-                <div style="font-weight: 600;" id="event-date"></div>
-                <div style="font-size: 0.875rem; color: var(--gray-500);" id="event-time"></div>
-              </div>
+        <div class="card detail-info-card" style="padding: 1.5rem; margin-bottom: 2rem;">
+          <div class="detail-info-row">
+            <div class="detail-info-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
             </div>
-
-            <div style="display: flex; align-items: center; gap: 1rem;">
-              <div style="width: 40px; height: 40px; border-radius: 0.5rem; background: var(--hover-bg); display: flex; align-items: center; justify-content: center; color: var(--text-main);">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-              </div>
-              <div>
-                <div style="font-weight: 600;" id="event-venue"></div>
-              </div>
+            <div>
+              <div class="detail-info-label">Date</div>
+              <div class="detail-info-value" id="event-date"></div>
+            </div>
+          </div>
+          <div class="detail-info-row">
+            <div class="detail-info-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
+            <div>
+              <div class="detail-info-label">Time</div>
+              <div class="detail-info-value" id="event-time"></div>
+            </div>
+          </div>
+          <div class="detail-info-row" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
+            <div class="detail-info-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            </div>
+            <div>
+              <div class="detail-info-label">Location</div>
+              <div class="detail-info-value" id="event-venue"></div>
             </div>
           </div>
         </div>
 
         <div style="margin-bottom: 2rem;">
-          <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem;">About this event</h3>
-          <div style="color: var(--gray-500); white-space: pre-wrap; line-height: 1.7;" id="event-description"></div>
+          <h2 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--text-main);">About this event</h2>
+          <div style="color: var(--text-muted); white-space: pre-wrap; line-height: 1.8;" id="event-description"></div>
         </div>
 
-        <div class="card" style="padding: 1.5rem; text-align: center; border-top: 4px solid var(--amber);">
-          <div style="margin-bottom: 1rem; font-weight: 600; font-size: 1.125rem;" id="event-count"></div>
+        <div class="card rsvp-card" style="padding: 1.5rem;">
+          <div class="rsvp-count" id="event-count"></div>
           <div id="rsvp-section"></div>
         </div>
       </div>
@@ -97,21 +114,32 @@
       const hero = document.getElementById('event-hero');
       if (currentEvent.image_url) {
         hero.innerHTML = `<img src="${currentEvent.image_url}" alt="Hero">`;
+      } else {
+        hero.classList.add('hero-placeholder');
       }
 
       document.getElementById('event-category').className = `badge badge-cat-${currentEvent.category.toLowerCase()}`;
       document.getElementById('event-category').textContent = currentEvent.category;
+      
+      const scorunBadge = document.getElementById('event-scorun');
+      if (currentEvent.scorun > 0) {
+        scorunBadge.textContent = `${currentEvent.scorun} SCORUN`;
+        scorunBadge.classList.remove('hidden');
+      } else {
+        scorunBadge.classList.add('hidden');
+      }
+      
       document.getElementById('event-title').textContent = currentEvent.title;
       
-      const dateObj = new Date(currentEvent.event_date);
+      const dateObj = new Date(currentEvent.event_date + 'T00:00:00');
       document.getElementById('event-date').textContent = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
-      document.getElementById('event-time').textContent = `${currentEvent.start_time.slice(0,5)} - ${currentEvent.end_time.slice(0,5)}`;
+      document.getElementById('event-time').textContent = `${currentEvent.start_time.slice(0,5)} – ${currentEvent.end_time.slice(0,5)}`;
       document.getElementById('event-venue').textContent = currentEvent.venue;
       document.getElementById('event-description').textContent = currentEvent.description;
       
       const count = currentEvent.registrations || 0;
       document.getElementById('event-count').innerHTML = `
-        <span style="color: var(--amber);">★</span> ${count} people going
+        <span class="rsvp-count-num">${count}</span> <span class="rsvp-count-label">people going</span>
       `;
 
       renderRsvpSection();
@@ -121,7 +149,7 @@
       const section = document.getElementById('rsvp-section');
       
       if (currentUser.role !== 'student') {
-        section.innerHTML = `<p style="color: var(--gray-500);">Only students can register for events.</p>`;
+        section.innerHTML = `<p style="color: var(--text-muted); font-size: 0.9rem;">Only students can register for events.</p>`;
         return;
       }
 
@@ -132,17 +160,15 @@
         const gcalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(currentEvent.title)}&dates=${start}/${end}&details=${encodeURIComponent(currentEvent.description)}&location=${encodeURIComponent(currentEvent.venue)}`;
 
         section.innerHTML = `
-          <div style="background: #DEF7EC; color: #03543F; padding: 1rem; border-radius: 0.75rem; margin-bottom: 1rem; font-weight: 600;">
-            ✓ You're registered!
-          </div>
-          <a href="${gcalUrl}" target="_blank" class="btn btn-outline" style="width: 100%; display: flex; gap: 0.5rem; justify-content: center;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+          <div class="registered-badge">✓ You're registered!</div>
+          <a href="${gcalUrl}" target="_blank" class="btn btn-outline" style="width: 100%; display: flex; gap: 0.5rem; justify-content: center; margin-top: 0.75rem;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
             Add to Google Calendar
           </a>
         `;
       } else {
         section.innerHTML = `
-          <button id="register-btn" onclick="handleRegister()" class="btn btn-primary" style="width: 100%; font-size: 1.125rem; padding: 1rem;">
+          <button id="register-btn" onclick="handleRegister()" class="btn btn-primary" style="width: 100%; font-size: 1.05rem; padding: 0.9rem;">
             Register Now
           </button>
         `;
@@ -152,26 +178,28 @@
     function handleRegister() {
       const btn = document.getElementById('register-btn');
       btn.disabled = true;
-      btn.textContent = 'Registering...';
+      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="spin" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Registering...`;
 
-      const rsvps = JSON.parse(localStorage.getItem('uni_rsvps') || '[]');
-      rsvps.push({ eventId: currentEvent.id, userId: currentUser.id });
-      localStorage.setItem('uni_rsvps', JSON.stringify(rsvps));
+      setTimeout(() => {
+        const rsvps = JSON.parse(localStorage.getItem('uni_rsvps') || '[]');
+        rsvps.push({ eventId: currentEvent.id, userId: currentUser.id });
+        localStorage.setItem('uni_rsvps', JSON.stringify(rsvps));
 
-      const allEvents = JSON.parse(localStorage.getItem('uni_events') || '[]');
-      const idx = allEvents.findIndex(e => e.id === currentEvent.id);
-      if (idx !== -1) {
-        allEvents[idx].registrations = (allEvents[idx].registrations || 0) + 1;
-        localStorage.setItem('uni_events', JSON.stringify(allEvents));
-        currentEvent.registrations = allEvents[idx].registrations;
-      }
+        const allEvents = JSON.parse(localStorage.getItem('uni_events') || '[]');
+        const idx = allEvents.findIndex(e => e.id === currentEvent.id);
+        if (idx !== -1) {
+          allEvents[idx].registrations = (allEvents[idx].registrations || 0) + 1;
+          localStorage.setItem('uni_events', JSON.stringify(allEvents));
+          currentEvent.registrations = allEvents[idx].registrations;
+        }
 
-      isRegistered = true;
-      
-      document.getElementById('event-count').innerHTML = `
-        <span style="color: var(--amber);">★</span> ${currentEvent.registrations} people going
-      `;
-      renderRsvpSection();
+        isRegistered = true;
+        
+        document.getElementById('event-count').innerHTML = `
+          <span class="rsvp-count-num">${currentEvent.registrations}</span> <span class="rsvp-count-label">people going</span>
+        `;
+        renderRsvpSection();
+      }, 600);
     }
   </script>
 </body>

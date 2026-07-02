@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <script>if(localStorage.getItem('uni_theme')==='dark') document.documentElement.classList.add('dark-mode');</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>UNIEvent</title>
   <link rel="stylesheet" href="style.css">
@@ -22,15 +23,24 @@
             </div>
             
             <div class="form-group">
-              <label class="form-label">Category</label>
-              <select id="ev-category" class="form-control" required>
-                <option value="Workshop">Workshop</option>
-                <option value="Competition">Competition</option>
-                <option value="Talk">Talk</option>
-                <option value="Social">Social</option>
-                <option value="Sports">Sports</option>
-                <option value="Other">Other</option>
-              </select>
+              <label class="form-label" data-i18n="lbl_category">Category</label>
+              
+              <div class="custom-dropdown" id="category-dropdown" style="width: 100%;">
+                <button type="button" class="dropdown-trigger" id="category-trigger" onclick="toggleCategoryDropdown()" style="width: 100%; justify-content: space-between;">
+                  <span id="category-display">Workshop</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s;" id="category-icon"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div class="dropdown-menu-custom" id="category-menu" style="width: 100%; max-width: none;">
+                  <div class="dropdown-grid" style="grid-template-columns: 1fr;">
+                    <button type="button" class="month-option active category-option" data-val="Workshop">Workshop</button>
+                    <button type="button" class="month-option category-option" data-val="Competition">Competition</button>
+                    <button type="button" class="month-option category-option" data-val="Talk">Talk</button>
+                    <button type="button" class="month-option category-option" data-val="Social">Social</button>
+                    <button type="button" class="month-option category-option" data-val="Sports">Sports</button>
+                    <button type="button" class="month-option category-option" data-val="Other">Other</button>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div class="form-group">
@@ -40,13 +50,55 @@
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
               <div class="form-group">
-                <label class="form-label">Date</label>
+                <label class="form-label" data-i18n="lbl_date">Date</label>
                 <input type="date" id="ev-date" class="form-control" required>
               </div>
               <div class="form-group">
-                <label class="form-label">Venue</label>
-                <input type="text" id="ev-venue" class="form-control" required>
+                <label class="form-label" data-i18n="lbl_location_type">Location Type</label>
+                <div class="segmented-control">
+                  <input type="radio" id="loc_physical" name="loc_type" value="physical" checked onchange="toggleLocType()">
+                  <input type="radio" id="loc_online" name="loc_type" value="online" onchange="toggleLocType()">
+                  
+                  <div class="segmented-indicator"></div>
+                  
+                  <label for="loc_physical" class="segmented-btn physical-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                    <span data-i18n="loc_physical">Physical</span>
+                  </label>
+                  
+                  <label for="loc_online" class="segmented-btn online-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                    <span data-i18n="loc_online">Online</span>
+                  </label>
+                </div>
               </div>
+            </div>
+
+            <div class="form-group" id="venue-physical-wrap">
+              <label class="form-label" data-i18n="lbl_venue">Venue</label>
+              <input type="text" id="ev-venue-physical" class="form-control" required placeholder="e.g. COIT Lab 1">
+            </div>
+
+            <div class="form-group" id="venue-online-wrap" style="display: none;">
+              <label class="form-label" data-i18n="lbl_platform">Online Platform</label>
+              
+              <div class="custom-dropdown" id="platform-dropdown" style="width: 100%;">
+                <button type="button" class="dropdown-trigger" id="platform-trigger" onclick="togglePlatformDropdown()" style="width: 100%; justify-content: space-between;">
+                  <span id="platform-display">Google Meet</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s;" id="platform-icon"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                </button>
+                <div class="dropdown-menu-custom" id="platform-menu" style="width: 100%; max-width: none;">
+                  <div class="dropdown-grid" style="grid-template-columns: 1fr;">
+                    <button type="button" class="month-option active platform-option" data-val="Google Meet">Google Meet</button>
+                    <button type="button" class="month-option platform-option" data-val="Microsoft Teams">Microsoft Teams</button>
+                    <button type="button" class="month-option platform-option" data-val="Zoom">Zoom</button>
+                    <button type="button" class="month-option platform-option" data-val="Webex">Webex</button>
+                    <button type="button" class="month-option platform-option" data-val="Other" data-i18n="platform_other">Other</button>
+                  </div>
+                </div>
+              </div>
+              
+              <input type="text" id="ev-venue-other" class="form-control" style="margin-top: 1rem; display: none;" placeholder="e.g. Discord, Skype, etc.">
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
@@ -60,9 +112,31 @@
               </div>
             </div>
 
-            <div class="form-group">
-              <label class="form-label">Image URL (Optional)</label>
-              <input type="url" id="ev-image" class="form-control" placeholder="https://...">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+              <div class="form-group">
+                <label class="form-label">Image URL (Optional)</label>
+                <input type="url" id="ev-image" class="form-control" placeholder="https://...">
+              </div>
+              
+              <div class="form-group">
+                <label class="form-label">SCORUN Points</label>
+                <div class="custom-dropdown dropup" id="scorun-dropdown" style="width: 100%;">
+                  <button type="button" class="dropdown-trigger" id="scorun-trigger" onclick="toggleScorunDropdown()" style="width: 100%; justify-content: space-between;">
+                    <span id="scorun-display">No SCORUN</span>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="transition: transform 0.3s;" id="scorun-icon"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                  </button>
+                  <div class="dropdown-menu-custom" id="scorun-menu" style="width: 100%; max-width: none;">
+                    <div class="dropdown-grid" style="grid-template-columns: 1fr;">
+                      <button type="button" class="month-option active scorun-option" data-val="0">No SCORUN</button>
+                      <button type="button" class="month-option scorun-option" data-val="1">1 Point</button>
+                      <button type="button" class="month-option scorun-option" data-val="2">2 Points</button>
+                      <button type="button" class="month-option scorun-option" data-val="3">3 Points</button>
+                      <button type="button" class="month-option scorun-option" data-val="4">4 Points</button>
+                      <button type="button" class="month-option scorun-option" data-val="5">5 Points</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <button type="submit" id="submit-btn" class="btn btn-navy" style="width: 100%; margin-top: 1rem;">Submit for Approval</button>
@@ -107,13 +181,21 @@
         const btn = document.getElementById('submit-btn');
         btn.disabled = true;
 
-        const newEvent = {
-          id: Date.now().toString(),
-          title: document.getElementById('ev-title').value,
-          category: document.getElementById('ev-category').value,
-          description: document.getElementById('ev-desc').value,
-          event_date: document.getElementById('ev-date').value,
-          venue: document.getElementById('ev-venue').value,
+          const isOnline = document.querySelector('input[name="loc_type"]:checked').value === 'online';
+          let venueVal = '';
+          if (isOnline) {
+            venueVal = activePlatform === 'Other' ? document.getElementById('ev-venue-other').value : activePlatform;
+          } else {
+            venueVal = document.getElementById('ev-venue-physical').value;
+          }
+
+          const newEvent = {
+            id: Date.now().toString(),
+            title: document.getElementById('ev-title').value,
+            category: activeCategorySubmit,
+            description: document.getElementById('ev-desc').value,
+            event_date: document.getElementById('ev-date').value,
+            venue: venueVal,
           start_time: start,
           end_time: end,
           image_url: document.getElementById('ev-image').value || null,
@@ -121,6 +203,7 @@
           requested_by_name: currentUser.name,
           status: 'pending',
           registrations: 0,
+          scorun: parseInt(activeScorun, 10),
           created_at: new Date().toISOString()
         };
 
@@ -130,6 +213,124 @@
 
         document.getElementById('submit-section').classList.add('hidden');
         document.getElementById('success-section').classList.remove('hidden');
+      });
+    });
+
+    let activePlatform = 'Google Meet';
+    let activeCategorySubmit = 'Workshop';
+    let activeScorun = 0;
+
+    function toggleScorunDropdown() {
+      const menu = document.getElementById('scorun-menu');
+      const icon = document.getElementById('scorun-icon');
+      menu.classList.toggle('show');
+      icon.style.transform = menu.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0)';
+    }
+
+    function toggleLocType() {
+      const isOnline = document.querySelector('input[name="loc_type"]:checked').value === 'online';
+      document.getElementById('venue-physical-wrap').style.display = isOnline ? 'none' : 'block';
+      document.getElementById('venue-online-wrap').style.display = isOnline ? 'block' : 'none';
+      
+      const physicalInput = document.getElementById('ev-venue-physical');
+      if (isOnline) {
+        physicalInput.removeAttribute('required');
+        if (activePlatform === 'Other') document.getElementById('ev-venue-other').setAttribute('required', 'true');
+      } else {
+        physicalInput.setAttribute('required', 'true');
+        document.getElementById('ev-venue-other').removeAttribute('required');
+      }
+    }
+
+    function togglePlatformDropdown() {
+      const menu = document.getElementById('platform-menu');
+      const icon = document.getElementById('platform-icon');
+      menu.classList.toggle('show');
+      icon.style.transform = menu.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0)';
+    }
+
+    function toggleCategoryDropdown() {
+      const menu = document.getElementById('category-menu');
+      const icon = document.getElementById('category-icon');
+      menu.classList.toggle('show');
+      icon.style.transform = menu.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0)';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Category Dropdown Logic
+      document.querySelectorAll('.category-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+          activeCategorySubmit = btn.getAttribute('data-val');
+          document.getElementById('category-display').textContent = btn.textContent;
+          document.querySelectorAll('.category-option').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          toggleCategoryDropdown();
+        });
+      });
+
+      // Platform Dropdown Logic
+      document.querySelectorAll('.platform-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+          activePlatform = btn.getAttribute('data-val');
+          const display = document.getElementById('platform-display');
+          
+          if (btn.hasAttribute('data-i18n')) {
+            display.setAttribute('data-i18n', btn.getAttribute('data-i18n'));
+          } else {
+            display.removeAttribute('data-i18n');
+          }
+          display.textContent = btn.textContent;
+          if (typeof applyLang === 'function') applyLang();
+
+          document.querySelectorAll('.platform-option').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          togglePlatformDropdown();
+          
+          const otherInput = document.getElementById('ev-venue-other');
+          if (activePlatform === 'Other') {
+            otherInput.style.display = 'block';
+            otherInput.setAttribute('required', 'true');
+          } else {
+            otherInput.style.display = 'none';
+            otherInput.removeAttribute('required');
+          }
+        });
+      });
+
+      // SCORUN Dropdown Logic
+      document.querySelectorAll('.scorun-option').forEach(btn => {
+        btn.addEventListener('click', () => {
+          activeScorun = btn.getAttribute('data-val');
+          document.getElementById('scorun-display').textContent = btn.textContent;
+          document.querySelectorAll('.scorun-option').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          toggleScorunDropdown();
+        });
+      });
+
+      // Close dropdowns when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!e.target.closest('#platform-dropdown')) {
+          const menu = document.getElementById('platform-menu');
+          if (menu && menu.classList.contains('show')) {
+            menu.classList.remove('show');
+            document.getElementById('platform-icon').style.transform = 'rotate(0)';
+          }
+        }
+        if (!e.target.closest('#category-dropdown')) {
+          const menu = document.getElementById('category-menu');
+          if (menu && menu.classList.contains('show')) {
+            menu.classList.remove('show');
+            document.getElementById('category-icon').style.transform = 'rotate(0)';
+          }
+        }
+        if (!e.target.closest('#scorun-dropdown')) {
+          const menu = document.getElementById('scorun-menu');
+          if (menu && menu.classList.contains('show')) {
+            menu.classList.remove('show');
+            document.getElementById('scorun-icon').style.transform = 'rotate(0)';
+          }
+        }
       });
     });
   </script>
