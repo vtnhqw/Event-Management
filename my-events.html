@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Events | UNIEvent</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body>
+  <div class="main-content">
+    <div class="container max-w-7xl">
+      <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+          <h1 class="title">My Events</h1>
+          <p style="color: var(--gray-500); margin-top: 0.5rem; font-size: 1.125rem;">Track the status of your submissions</p>
+        </div>
+        <a href="submit.html" class="btn btn-primary">Submit New Event</a>
+      </div>
+
+      <div id="my-events-list" class="grid grid-cols-1 grid-cols-2 grid-cols-3"></div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!checkAuth()) return;
+
+      if (currentUser.role !== 'committee') {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      loadMyEvents();
+    });
+
+    function loadMyEvents() {
+      const allEvents = JSON.parse(localStorage.getItem('uni_events') || '[]');
+      const myEvents = allEvents.filter(e => e.requested_by === currentUser.id);
+      
+      const container = document.getElementById('my-events-list');
+
+      if (myEvents.length === 0) {
+        container.innerHTML = `<div style="grid-column: 1 / -1; padding: 4rem 1rem; text-align: center; color: var(--gray-500);">You haven't submitted any events yet.</div>`;
+        return;
+      }
+
+      container.innerHTML = myEvents.map(ev => `
+        <div class="card" style="display: flex; flex-direction: column; h-full">
+          ${ev.image_url 
+              ? `<img src="${ev.image_url}" class="event-img" style="height: 10rem;">` 
+              : `<div class="event-img" style="height: 10rem;"></div>`}
+          <div style="padding: 1.5rem; flex: 1; display: flex; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+              <span class="badge badge-${ev.status}">${ev.status}</span>
+              <span style="font-size: 0.75rem; color: var(--gray-500);">${ev.category}</span>
+            </div>
+            <h3 style="font-size: 1.125rem; font-weight: 700; margin-bottom: 0.25rem;">${ev.title}</h3>
+            <div style="font-size: 0.875rem; color: var(--gray-500); margin-bottom: 1rem;">
+              ${ev.event_date} &bull; ${ev.venue}
+            </div>
+            ${ev.status === 'rejected' && ev.reject_reason ? `
+              <div style="margin-top: auto; padding: 0.75rem; background: #FDE8E8; border-radius: 0.5rem; border: 1px solid #F8B4B4; font-size: 0.875rem; color: #9B1C1C;">
+                <strong>Reason:</strong> ${ev.reject_reason}
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+  </script>
+</body>
+</html>

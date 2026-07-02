@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Submit Event | UNIEvent</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js"></script>
+</head>
+<body>
+  <div class="main-content">
+    <div class="container max-w-md">
+      <div id="submit-section">
+        <h1 class="title" style="margin-bottom: 0.5rem; font-size: 2rem;">Submit Event</h1>
+        <p style="color: var(--gray-500); margin-bottom: 2rem;">Fill in the details for your event. It will be reviewed by an admin.</p>
+        
+        <div class="card" style="padding: 2rem;">
+          <form id="submit-form">
+            <div class="form-group">
+              <label class="form-label">Event Title</label>
+              <input type="text" id="ev-title" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Category</label>
+              <select id="ev-category" class="form-control" required>
+                <option value="Workshop">Workshop</option>
+                <option value="Competition">Competition</option>
+                <option value="Talk">Talk</option>
+                <option value="Social">Social</option>
+                <option value="Sports">Sports</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Description</label>
+              <textarea id="ev-desc" class="form-control" rows="4" required></textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label class="form-label">Date</label>
+                <input type="date" id="ev-date" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Venue</label>
+                <input type="text" id="ev-venue" class="form-control" required>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="form-group">
+                <label class="form-label">Start Time</label>
+                <input type="time" id="ev-start" class="form-control" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label">End Time</label>
+                <input type="time" id="ev-end" class="form-control" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Image URL (Optional)</label>
+              <input type="url" id="ev-image" class="form-control" placeholder="https://...">
+            </div>
+
+            <button type="submit" id="submit-btn" class="btn btn-navy" style="width: 100%; margin-top: 1rem;">Submit for Approval</button>
+          </form>
+        </div>
+      </div>
+
+      <div id="success-section" class="hidden" style="text-align: center; padding: 4rem 1rem;">
+        <div style="width: 64px; height: 64px; background: #DEF7EC; color: #03543F; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
+        <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem;">Submitted successfully</h2>
+        <p style="color: var(--gray-500); margin-bottom: 2rem;">Your event is now awaiting admin approval.</p>
+        <a href="my-events.html" class="btn btn-primary">View My Events</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!checkAuth()) return;
+
+      if (currentUser.role !== 'committee') {
+        window.location.href = 'index.html';
+        return;
+      }
+
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('ev-date').setAttribute('min', today);
+
+      document.getElementById('submit-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const start = document.getElementById('ev-start').value;
+        const end = document.getElementById('ev-end').value;
+
+        if (start >= end) {
+          showToast('End time must be after start time');
+          return;
+        }
+
+        const btn = document.getElementById('submit-btn');
+        btn.disabled = true;
+
+        const newEvent = {
+          id: Date.now().toString(),
+          title: document.getElementById('ev-title').value,
+          category: document.getElementById('ev-category').value,
+          description: document.getElementById('ev-desc').value,
+          event_date: document.getElementById('ev-date').value,
+          venue: document.getElementById('ev-venue').value,
+          start_time: start,
+          end_time: end,
+          image_url: document.getElementById('ev-image').value || null,
+          requested_by: currentUser.id,
+          requested_by_name: currentUser.name,
+          status: 'pending',
+          registrations: 0,
+          created_at: new Date().toISOString()
+        };
+
+        const events = JSON.parse(localStorage.getItem('uni_events') || '[]');
+        events.push(newEvent);
+        localStorage.setItem('uni_events', JSON.stringify(events));
+
+        document.getElementById('submit-section').classList.add('hidden');
+        document.getElementById('success-section').classList.remove('hidden');
+      });
+    });
+  </script>
+</body>
+</html>
