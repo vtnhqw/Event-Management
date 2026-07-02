@@ -51,13 +51,16 @@ function toggleTheme() {
   
   const btn = document.getElementById('theme-toggle-btn');
   if (btn) {
-    btn.classList.add('spin-anim');
-    setTimeout(() => {
-      btn.innerHTML = isDarkMode ? sunIcon : moonIcon;
-    }, 200); // Swap exactly halfway through the 0.4s animation
+    // Swap icon immediately
+    btn.innerHTML = isDarkMode ? sunIcon : moonIcon;
+    
+    // Trigger pop animation
+    btn.classList.remove('pop-anim');
+    void btn.offsetWidth; // Trigger reflow to restart animation
+    btn.classList.add('pop-anim');
     
     setTimeout(() => {
-      btn.classList.remove('spin-anim');
+      btn.classList.remove('pop-anim');
     }, 400); // Remove class after animation ends
   }
 }
