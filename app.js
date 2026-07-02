@@ -162,28 +162,30 @@ function renderNav() {
   navContainer.innerHTML = `
     <nav class="navbar">
       <div class="nav-container">
-        <a href="index.html" class="nav-brand">UNI<span>Event</span></a>
-        <div class="nav-right">
+        <div style="display: flex; align-items: center; gap: 2rem;">
+          <a href="index.html" class="nav-brand">UNI<span>Event</span></a>
           <div class="nav-links">
             ${linksHtml}
           </div>
-          
+        </div>
+        
+        <div class="nav-right" style="gap: 0;">
           <!-- Controls -->
-          <div style="display: flex; align-items: center; gap: 0.25rem; border-left: 1px solid var(--border-color); padding-left: 1rem; margin-left: 0.5rem;">
+          <div style="display: flex; align-items: center; gap: 0.25rem; border-right: 1px solid var(--border-color); padding-right: 1rem; margin-right: 0.5rem;">
             <button id="lang-toggle-btn" onclick="toggleLang()" class="lang-toggle" title="Toggle Language" style="font-weight: 700; font-size: 0.85rem; color: var(--text-muted); width: 2.5rem; height: 2.5rem; border-radius: 50%; transition: all 0.2s; display: flex; align-items: center; justify-content: center;">
               ${currentLang.toUpperCase()}
             </button>
-            <button id="theme-toggle-btn" onclick="toggleTheme()" class="theme-toggle" title="Toggle Dark Mode">
+            <button id="theme-toggle-btn" onclick="toggleTheme()" class="theme-toggle" title="Toggle Dark Mode" style="margin-left: 0;">
               ${isDarkMode ? sunIcon : moonIcon}
             </button>
           </div>
 
           <!-- Improved User Profile -->
-          <div class="user-profile-improved">
+          <div class="user-profile-improved" style="margin-left: 0;">
             <div class="avatar">${initial}</div>
-            <div class="user-details">
-              <span class="user-name">${currentUser.name}</span>
-              <span class="role-badge role-${currentUser.role}" data-i18n="role_${currentUser.role}">${TRANSLATIONS[currentLang]['role_' + currentUser.role]}</span>
+            <div class="user-details" style="width: 130px;">
+              <span class="user-name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: block;">${currentUser.name}</span>
+              <span class="role-badge role-${currentUser.role}" data-i18n="role_${currentUser.role}" style="display: inline-block;">${TRANSLATIONS[currentLang]['role_' + currentUser.role]}</span>
             </div>
             <div class="user-dropdown">
               <button onclick="handleLogout()" class="dropdown-item" style="color: #EF4444;" data-i18n="nav_logout">${TRANSLATIONS[currentLang].nav_logout}</button>
