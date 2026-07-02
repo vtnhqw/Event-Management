@@ -266,12 +266,14 @@ h1, h2, h3, h4 {
   font-size: 0.95rem;
   font-weight: 600;
   color: var(--text-muted);
-  transition: color 0.2s, transform 0.2s;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  transition: color 0.2s ease, background-color 0.2s ease;
 }
 
 .nav-link:hover {
   color: var(--text-main);
-  transform: translateY(-1px);
+  background-color: var(--hover-bg);
 }
 
 .user-profile {
