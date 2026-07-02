@@ -165,6 +165,16 @@ h1, h2, h3, h4 {
   height: 20px;
 }
 
+@keyframes icon-spin {
+  0% { transform: rotate(0deg) scale(1); opacity: 1; }
+  50% { transform: rotate(180deg) scale(0.5); opacity: 0; }
+  100% { transform: rotate(360deg) scale(1); opacity: 1; }
+}
+
+.spin-anim svg {
+  animation: icon-spin 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
 /* Cards */
 .card {
   background-color: var(--card-bg);
