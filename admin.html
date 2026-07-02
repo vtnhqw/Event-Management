@@ -54,7 +54,15 @@
     function renderPending(events) {
       const container = document.getElementById('pending-list');
       if (events.length === 0) {
-        container.innerHTML = `<div style="padding: 2rem; text-align: center; color: var(--gray-500); background: var(--white); border-radius: 1rem; border: 1px dashed var(--gray-200);">All caught up! No pending events.</div>`;
+        container.innerHTML = `
+          <div style="padding: 4rem 1rem; text-align: center; background: var(--card-bg); border-radius: 1.25rem; border: 1px dashed var(--border-color); display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <div style="color: var(--amber); margin-bottom: 1.25rem; opacity: 0.9; width: 64px; height: 64px; background: rgba(217, 164, 65, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;" data-i18n="all_caught_up">All caught up!</h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem;" data-i18n="no_pending_events">There are no events waiting for approval.</p>
+          </div>
+        `;
         return;
       }
 
