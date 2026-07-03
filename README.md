@@ -27,8 +27,18 @@ A modern, premium Event Management prototype built entirely with HTML, CSS, and 
 Since this is a prototype, there is no build step or backend to start. 
 
 1. Clone the repository.
-2. Open `login.html` directly in your browser.
-3. Select your desired role (Student, Committee, or Admin) to test the various dashboards and permissions!
+2. Open `index.html` in your browser (or serve the folder with any static file server).
+3. Browse events freely, or sign in with your role:
+   - **Student / Committee** — Student ID + password
+   - **Admin** — Email + password
+
+### Demo credentials
+
+| Role | Login | Password |
+|------|-------|----------|
+| Student | `SW01083101` | `student123` |
+| Committee | `SW01083102` | `committee123` |
+| Admin | `admin@uniten.edu.my` | `admin123` |
 
 ## 💡 Key Design Decisions
 - **SCORUN Integration**: Supports the university SCORUN points system directly on event cards and detail pages.

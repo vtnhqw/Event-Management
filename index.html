@@ -7,7 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>UNIEvent</title>
   <link rel="stylesheet" href="style.css">
-  <script src="app.js"></script>
   <style>
     .page-view {
       display: none;
@@ -242,48 +241,91 @@
               </a>
             </div>
 
-            <h1 class="auth-form-title" data-i18n="login_title">Welcome back 👋</h1>
-            <p class="auth-form-subtitle" data-i18n="login_sub">Choose your role and jump right in.</p>
+            <h1 class="auth-form-title" id="auth-form-title" data-i18n="login_title">Choose your role</h1>
+            <p class="auth-form-subtitle" id="auth-form-subtitle" data-i18n="login_sub">Select how you want to sign in</p>
 
-            <form id="signup-form">
-              <!-- Name Field -->
-              <div class="auth-field">
-                <label for="signup-name">Your Name</label>
-                <input type="text" id="signup-name" required placeholder="e.g. Ahmad Arif" autocomplete="name">
+            <form id="signup-form" novalidate>
+              <!-- Step 1: Role Selection -->
+              <div id="auth-step-role">
+                <div class="auth-field" style="margin-bottom: 0;">
+                  <label data-i18n="lbl_role">Role</label>
+                </div>
+                <div class="auth-role-grid" id="role-grid">
+                  <button type="button" class="auth-role-btn" data-val="student">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                      <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                    </svg>
+                    <span data-i18n="role_label_student">Student</span>
+                  </button>
+                  <button type="button" class="auth-role-btn" data-val="committee">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                      <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                    </svg>
+                    <span data-i18n="role_label_committee">Committee</span>
+                  </button>
+                  <button type="button" class="auth-role-btn" data-val="admin">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                    <span data-i18n="role_label_admin">Admin</span>
+                  </button>
+                </div>
+                <button type="button" class="btn btn-primary auth-submit-btn" id="auth-continue-btn" data-i18n="btn_continue">Continue</button>
               </div>
 
-              <!-- Role Selector -->
-              <div class="auth-field" style="margin-bottom: 0;">
-                <label>Select Role</label>
-              </div>
-              <div class="auth-role-grid" id="role-grid">
-                <button type="button" class="auth-role-btn active" data-val="student">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              <!-- Step 2: Credentials -->
+              <div id="auth-step-credentials" class="hidden">
+                <button type="button" class="auth-change-role-btn" id="auth-change-role-btn">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
                     stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-                    <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
                   </svg>
-                  Student
+                  <span data-i18n="btn_change_role">Change role</span>
                 </button>
-                <button type="button" class="auth-role-btn" data-val="committee">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-                  </svg>
-                  Committee
-                </button>
-                <button type="button" class="auth-role-btn" data-val="admin">
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                  </svg>
-                  Admin
-                </button>
-              </div>
 
-              <!-- Submit -->
-              <button type="submit" class="btn btn-primary auth-submit-btn" id="signup-btn">Enter Workspace →</button>
+                <div class="auth-role-badge" id="auth-role-badge">
+                  <span data-i18n="lbl_role">Role</span>:
+                  <strong id="auth-selected-role-label">Student</strong>
+                </div>
+
+                <!-- Student / Committee fields -->
+                <div id="auth-student-fields">
+                  <div class="auth-field">
+                    <label for="login-student-id" data-i18n="lbl_student_id">Student ID</label>
+                    <input type="text" id="login-student-id" placeholder="e.g. SW01083101"
+                      data-i18n-placeholder="ph_student_id" autocomplete="username">
+                  </div>
+                  <div class="auth-field">
+                    <label for="login-password" data-i18n="lbl_password">Password</label>
+                    <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+                  </div>
+                </div>
+
+                <!-- Admin fields -->
+                <div id="auth-admin-fields" class="hidden">
+                  <div class="auth-field">
+                    <label for="login-email" data-i18n="lbl_email">Email</label>
+                    <input type="email" id="login-email" placeholder="e.g. admin@uniten.edu.my"
+                      data-i18n-placeholder="ph_email" autocomplete="username">
+                  </div>
+                  <div class="auth-field">
+                    <label for="login-admin-password" data-i18n="lbl_password">Password</label>
+                    <input type="password" id="login-admin-password" placeholder="••••••••" autocomplete="current-password">
+                  </div>
+                </div>
+
+                <div id="login-error" class="auth-error hidden" data-i18n="auth_error_invalid">
+                  Invalid credentials. Please check your details and try again.
+                </div>
+
+                <button type="submit" class="btn btn-primary auth-submit-btn" id="signup-btn" data-i18n="btn_signin">Sign In</button>
+              </div>
             </form>
 
             <!-- Info Note -->
@@ -294,8 +336,7 @@
                 <line x1="12" y1="8" x2="12" y2="12"></line>
                 <line x1="12" y1="16" x2="12.01" y2="16"></line>
               </svg>
-              <p><strong>Prototype Mode</strong> — No password required. Pick your role and start exploring the
-                platform!</p>
+              <p data-i18n="auth_demo_note"><strong>Demo accounts</strong> — Student: SW01083101 / student123 · Committee: SW01083102 / committee123 · Admin: admin@uniten.edu.my / admin123</p>
             </div>
 
           </div>
@@ -829,6 +870,7 @@
 
   </div>
   <footer id="global-footer" class="site-footer">UNIEvent Prototype &copy; 2026. All rights reserved.</footer>
+  <script src="app.js" defer></script>
 </body>
 
 </html>

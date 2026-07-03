@@ -62,14 +62,27 @@ const SEED_EVENTS = [
   }
 ];
 
+const SEED_USERS = [
+  { id: 'u_student_1', studentId: 'SW01083101', email: null, password: 'student123', name: 'Ahmad Arif', role: 'student' },
+  { id: 'u_committee_1', studentId: 'SW01083102', email: null, password: 'committee123', name: 'Siti Rahman', role: 'committee' },
+  { id: 'u_admin_1', studentId: null, email: 'admin@uniten.edu.my', password: 'admin123', name: 'Admin User', role: 'admin' }
+];
+
 const TRANSLATIONS = {
   en: {
     nav_submit: "Submit Event", nav_my_events: "My Events", nav_admin: "Admin Dashboard", nav_logout: "Logout",
     role_student: "STUDENT", role_committee: "COMMITTEE", role_admin: "ADMIN",
     discover_title: "Discover Events", discover_subtitle: "Find and join what's happening at UNITEN",
-    filter_all: "All", filter_workshop: "Workshop", filter_competition: "Competition", filter_talk: "Talk", filter_social: "Social", filter_sports: "Sports", filter_hiring: "Hiring", filter_other: "Other",
+    filter_all: "All Events", browse_category: "Browse by Category", filter_workshop: "Workshop", filter_competition: "Competition", filter_talk: "Talk", filter_social: "Social", filter_sports: "Sports", filter_hiring: "Hiring", filter_other: "Other",
+    all_caught_up: "All caught up!", no_pending_events: "There are no events waiting for approval.", max_participants: "Max Participants",
     empty_events: "No events found", empty_events_sub: "There are no approved events in this category yet.",
-    login_title: "Get Started", login_sub: "Join UNIEvent Prototype", lbl_name: "Full Name", lbl_role: "Role", btn_enter: "Enter Prototype",
+    login_title: "Choose your role", login_sub: "Select how you want to sign in", login_title_signin: "Sign in", login_sub_signin: "Enter your credentials to continue",
+    lbl_student_id: "Student ID", lbl_password: "Password", lbl_email: "Email", lbl_role: "Role",
+    btn_continue: "Continue", btn_signin: "Sign In", btn_change_role: "Change role", btn_enter: "Sign In",
+    ph_student_id: "e.g. SW01083101", ph_email: "e.g. admin@uniten.edu.my",
+    auth_error_invalid: "Invalid credentials. Please check your details and try again.",
+    auth_demo_note: "Demo accounts — Student: SW01083101 / student123 · Committee: SW01083102 / committee123 · Admin: admin@uniten.edu.my / admin123",
+    role_label_student: "Student", role_label_committee: "Committee", role_label_admin: "Admin",
     about_event: "About this event", btn_register: "Register Now",
     admin_title: "Admin Dashboard", admin_sub: "Review and manage event submissions", needs_approval: "Needs Approval", recently_decided: "Recently Decided",
     my_events_title: "My Events", my_events_sub: "Track the status of your submissions", btn_submit_new: "Submit New Event",
@@ -83,9 +96,16 @@ const TRANSLATIONS = {
     nav_submit: "Hantar Acara", nav_my_events: "Acara Saya", nav_admin: "Papan Pemuka Admin", nav_logout: "Log Keluar",
     role_student: "PELAJAR", role_committee: "JAWATANKUASA", role_admin: "ADMIN",
     discover_title: "Teroka Acara", discover_subtitle: "Cari dan sertai aktiviti di UNITEN",
-    filter_all: "Semua", filter_workshop: "Bengkel", filter_competition: "Pertandingan", filter_talk: "Ceramah", filter_social: "Sosial", filter_sports: "Sukan", filter_hiring: "Pengambilan", filter_other: "Lain-lain",
+    filter_all: "Semua Acara", browse_category: "Layari mengikut Kategori", filter_workshop: "Bengkel", filter_competition: "Pertandingan", filter_talk: "Ceramah", filter_social: "Sosial", filter_sports: "Sukan", filter_hiring: "Pengambilan", filter_other: "Lain-lain",
+    all_caught_up: "Semua selesai!", no_pending_events: "Tiada acara menunggu kelulusan.", max_participants: "Peserta Maksimum",
     empty_events: "Tiada acara dijumpai", empty_events_sub: "Tiada acara yang diluluskan dalam kategori ini.",
-    login_title: "Mula Sekarang", login_sub: "Sertai Prototaip UNIEvent", lbl_name: "Nama Penuh", lbl_role: "Peranan", btn_enter: "Masuk Prototaip",
+    login_title: "Pilih peranan anda", login_sub: "Pilih cara anda mahu log masuk", login_title_signin: "Log masuk", login_sub_signin: "Masukkan maklumat log masuk anda",
+    lbl_student_id: "ID Pelajar", lbl_password: "Kata Laluan", lbl_email: "E-mel", lbl_role: "Peranan",
+    btn_continue: "Teruskan", btn_signin: "Log Masuk", btn_change_role: "Tukar peranan", btn_enter: "Log Masuk",
+    ph_student_id: "cth. SW01083101", ph_email: "cth. admin@uniten.edu.my",
+    auth_error_invalid: "Maklumat log masuk tidak sah. Sila semak dan cuba lagi.",
+    auth_demo_note: "Akaun demo — Pelajar: SW01083101 / student123 · Jawatankuasa: SW01083102 / committee123 · Admin: admin@uniten.edu.my / admin123",
+    role_label_student: "Pelajar", role_label_committee: "Jawatankuasa", role_label_admin: "Admin",
     about_event: "Tentang acara ini", btn_register: "Daftar Sekarang",
     admin_title: "Papan Pemuka Admin", admin_sub: "Semak dan urus penyertaan acara", needs_approval: "Perlu Kelulusan", recently_decided: "Keputusan Terkini",
     my_events_title: "Acara Saya", my_events_sub: "Jejak status penyertaan anda", btn_submit_new: "Hantar Acara Baru",
@@ -196,6 +216,25 @@ function initDB() {
   if (!localStorage.getItem('uni_rsvps')) {
     localStorage.setItem('uni_rsvps', JSON.stringify([]));
   }
+
+  if (!localStorage.getItem('uni_users')) {
+    localStorage.setItem('uni_users', JSON.stringify(SEED_USERS));
+  }
+}
+
+function authenticateUser(role, credentials) {
+  const users = safeParseJSON('uni_users', SEED_USERS);
+  if (role === 'admin') {
+    const email = (credentials.email || '').trim().toLowerCase();
+    return users.find(u => u.role === 'admin' && u.email.toLowerCase() === email && u.password === credentials.password);
+  }
+  const studentId = (credentials.studentId || '').trim().toUpperCase();
+  return users.find(u => u.role === role && u.studentId === studentId && u.password === credentials.password);
+}
+
+function getRoleLabel(role) {
+  const key = `role_label_${role}`;
+  return TRANSLATIONS[currentLang][key] || role;
 }
 
 function showToast(message, type = 'success') {
@@ -237,6 +276,8 @@ function showToast(message, type = 'success') {
 }
 
 // --- ROUTING SYSTEM ---
+const PROTECTED_ROUTES = ['admin', 'submit', 'my-events'];
+
 const routes = {
   '': initDiscoverView,
   '#discover': initDiscoverView,
@@ -251,6 +292,16 @@ function router() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
   const hash = window.location.hash.split('?')[0];
   const viewId = hash ? hash.substring(1) : 'discover';
+
+  // Auth guard — redirect before rendering protected views
+  if (viewId === 'login' && currentUser) {
+    window.location.hash = '#discover';
+    return;
+  }
+  if (PROTECTED_ROUTES.includes(viewId) && !currentUser) {
+    window.location.hash = '#login';
+    return;
+  }
   
   // Hide all views and reset animations
   document.querySelectorAll('.page-view').forEach(el => {
@@ -282,7 +333,7 @@ function router() {
       clearInterval(authCarouselTimer);
       authCarouselTimer = null;
     }
-    checkAuth(true);
+    renderNav();
   }
   
   // Call init function
@@ -321,6 +372,8 @@ function handleLogout() {
 
 document.addEventListener('DOMContentLoaded', () => {
   initDB();
+  applyTheme();
+  applyLang();
   
   // Always create nav container for SPA
   if (!document.getElementById('navbar-container')) {
@@ -332,8 +385,12 @@ document.addEventListener('DOMContentLoaded', () => {
   
   window.addEventListener('hashchange', router);
   
-  // Initial route
-  setTimeout(router, 10);
+  // Initial route — default to discover when no hash is set
+  if (!window.location.hash) {
+    window.location.hash = '#discover';
+  } else {
+    router();
+  }
 });
 
 // --- DISCOVER VIEW ---
@@ -341,17 +398,16 @@ let activeCategory = 'All';
 let activeMonth = 'all';
 
 function initDiscoverView() {
-  const currentMonthStr = (new Date().getMonth() + 1).toString().padStart(2, '0');
-  activeMonth = currentMonthStr;
+  activeMonth = 'all';
   
-  const defaultBtn = document.querySelector(`.month-option[data-val="${activeMonth}"]`);
+  const defaultBtn = document.querySelector('.month-option[data-val="all"]');
   if (defaultBtn) {
     document.querySelectorAll('.month-option').forEach(b => b.classList.remove('active'));
     defaultBtn.classList.add('active');
     const display = document.getElementById('month-display');
-    if(display) {
-       display.setAttribute('data-i18n', defaultBtn.getAttribute('data-i18n'));
-       display.innerText = defaultBtn.innerText;
+    if (display) {
+      display.setAttribute('data-i18n', defaultBtn.getAttribute('data-i18n'));
+      display.innerText = defaultBtn.innerText;
     }
   }
   
@@ -530,7 +586,8 @@ function renderEvents() {
 }
 
 // --- LOGIN VIEW ---
-let loginActiveRole = 'student';
+let loginActiveRole = null;
+let authLoginStep = 'role';
 
 let authCarouselIndex = 0;
 
@@ -605,21 +662,73 @@ function initAuthCarousel() {
   startAutoplay();
 }
 
+function showLoginStep(step) {
+  authLoginStep = step;
+  const roleStep = document.getElementById('auth-step-role');
+  const credStep = document.getElementById('auth-step-credentials');
+  const title = document.getElementById('auth-form-title');
+  const subtitle = document.getElementById('auth-form-subtitle');
+  const errorEl = document.getElementById('login-error');
+
+  if (errorEl) errorEl.classList.add('hidden');
+
+  if (step === 'role') {
+    if (roleStep) roleStep.classList.remove('hidden');
+    if (credStep) credStep.classList.add('hidden');
+    if (title) title.setAttribute('data-i18n', 'login_title');
+    if (subtitle) subtitle.setAttribute('data-i18n', 'login_sub');
+  } else {
+    if (roleStep) roleStep.classList.add('hidden');
+    if (credStep) credStep.classList.remove('hidden');
+    if (title) title.setAttribute('data-i18n', 'login_title_signin');
+    if (subtitle) subtitle.setAttribute('data-i18n', 'login_sub_signin');
+
+    const roleLabel = document.getElementById('auth-selected-role-label');
+    if (roleLabel) roleLabel.textContent = getRoleLabel(loginActiveRole);
+
+    const studentFields = document.getElementById('auth-student-fields');
+    const adminFields = document.getElementById('auth-admin-fields');
+    if (loginActiveRole === 'admin') {
+      if (studentFields) studentFields.classList.add('hidden');
+      if (adminFields) adminFields.classList.remove('hidden');
+    } else {
+      if (studentFields) studentFields.classList.remove('hidden');
+      if (adminFields) adminFields.classList.add('hidden');
+    }
+  }
+  applyLang();
+}
+
 function initLoginView() {
   checkAuth(false);
   initAuthCarousel();
-  
-  const form = document.getElementById('signup-form');
-  if(form) {
-      form.onsubmit = (e) => {
-        e.preventDefault();
-        const name = document.getElementById('signup-name').value.trim();
-        if (!name) return;
-        const fakeUser = { id: 'user_' + Date.now(), name, role: loginActiveRole };
-        localStorage.setItem('uni_user', JSON.stringify(fakeUser));
-        currentUser = fakeUser;
-        window.location.hash = '#discover';
-      };
+
+  loginActiveRole = null;
+  document.querySelectorAll('.auth-role-btn').forEach(b => b.classList.remove('active'));
+  showLoginStep('role');
+
+  const continueBtn = document.getElementById('auth-continue-btn');
+  if (continueBtn) {
+    continueBtn.onclick = () => {
+      if (!loginActiveRole) {
+        showToast(TRANSLATIONS[currentLang].login_sub, 'warning');
+        return;
+      }
+      showLoginStep('credentials');
+      const firstInput = loginActiveRole === 'admin'
+        ? document.getElementById('login-email')
+        : document.getElementById('login-student-id');
+      if (firstInput) firstInput.focus();
+    };
+  }
+
+  const changeRoleBtn = document.getElementById('auth-change-role-btn');
+  if (changeRoleBtn) {
+    changeRoleBtn.onclick = () => {
+      const form = document.getElementById('signup-form');
+      if (form) form.reset();
+      showLoginStep('role');
+    };
   }
 
   document.querySelectorAll('.auth-role-btn').forEach(btn => {
@@ -629,6 +738,50 @@ function initLoginView() {
       loginActiveRole = btn.getAttribute('data-val');
     };
   });
+
+  const form = document.getElementById('signup-form');
+  if (form) {
+    form.onsubmit = (e) => {
+      e.preventDefault();
+      if (authLoginStep !== 'credentials' || !loginActiveRole) return;
+
+      const errorEl = document.getElementById('login-error');
+      let user = null;
+
+      if (loginActiveRole === 'admin') {
+        const email = document.getElementById('login-email').value.trim();
+        const password = document.getElementById('login-admin-password').value;
+        if (!email || !password) {
+          showToast(TRANSLATIONS[currentLang].auth_error_invalid, 'error');
+          return;
+        }
+        user = authenticateUser('admin', { email, password });
+      } else {
+        const studentId = document.getElementById('login-student-id').value.trim();
+        const password = document.getElementById('login-password').value;
+        if (!studentId || !password) {
+          showToast(TRANSLATIONS[currentLang].auth_error_invalid, 'error');
+          return;
+        }
+        user = authenticateUser(loginActiveRole, { studentId, password });
+      }
+
+      if (!user) {
+        if (errorEl) errorEl.classList.remove('hidden');
+        showToast(TRANSLATIONS[currentLang].auth_error_invalid, 'error');
+        return;
+      }
+
+      const sessionUser = { id: user.id, name: user.name, role: user.role };
+      if (user.studentId) sessionUser.studentId = user.studentId;
+      if (user.email) sessionUser.email = user.email;
+
+      localStorage.setItem('uni_user', JSON.stringify(sessionUser));
+      currentUser = sessionUser;
+      form.reset();
+      window.location.hash = '#discover';
+    };
+  }
 }
 
 // --- ADMIN VIEW ---
@@ -772,7 +925,6 @@ function submitReject(id) {
 
 // --- EVENT VIEW ---
 function initEventView() {
-  if (!checkAuth(false)) return;
   const hashParts = window.location.hash.split('?');
   if (hashParts.length < 2) {
       window.location.hash = '#discover';
@@ -1375,6 +1527,45 @@ function initSubmitView() {
   if (submitSection && successSection) {
     submitSection.classList.remove('hidden');
     successSection.classList.add('hidden');
+  }
+
+  const submitForm = document.getElementById('submit-form');
+  if (submitForm) submitForm.reset();
+
+  const imagePreview = document.getElementById('img-live-preview');
+  const imagePlaceholder = document.getElementById('img-placeholder-blur');
+  if (imagePreview) {
+    imagePreview.src = '';
+    imagePreview.style.opacity = '0';
+  }
+  if (imagePlaceholder) imagePlaceholder.style.opacity = '1';
+
+  const descCounter = document.getElementById('desc-counter');
+  if (descCounter) descCounter.innerText = '0';
+
+  const imageInput = document.getElementById('ev-image');
+  if (imageInput) {
+    imageInput.oninput = () => {
+      const url = imageInput.value.trim();
+      const preview = document.getElementById('img-live-preview');
+      const placeholder = document.getElementById('img-placeholder-blur');
+      if (!preview) return;
+      if (url) {
+        preview.src = url;
+        preview.onload = () => {
+          preview.style.opacity = '1';
+          if (placeholder) placeholder.style.opacity = '0';
+        };
+        preview.onerror = () => {
+          preview.style.opacity = '0';
+          if (placeholder) placeholder.style.opacity = '1';
+        };
+      } else {
+        preview.src = '';
+        preview.style.opacity = '0';
+        if (placeholder) placeholder.style.opacity = '1';
+      }
+    };
   }
 
   // Category dropdown options selection
