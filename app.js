@@ -60,6 +60,51 @@ const FALLBACK_EVENTS = [
     status: 'approved',
     registrations: 34,
     scorun: 1
+  },
+  {
+    id: '5',
+    title: 'UNITEN Cultural Night & Food Bazaar',
+    category: 'Social',
+    description: 'Experience the diverse cultures of our student community! Enjoy traditional performances, games, and delicious food stalls from various states and countries.',
+    event_date: '2026-08-05',
+    start_time: '18:00',
+    end_time: '23:00',
+    venue: 'Student Activity Center (SAC) Courtyard',
+    image_url: 'https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&q=80&w=800',
+    requested_by_name: 'International Student Association',
+    status: 'approved',
+    registrations: 150,
+    scorun: 2
+  },
+  {
+    id: '6',
+    title: 'UNITEN Inter-College Badminton Championship',
+    category: 'Sports',
+    description: 'Smash your way to victory! Compete against other colleges in single and double categories. Amazing prizes and medals await the winners.',
+    event_date: '2026-08-12',
+    start_time: '08:30',
+    end_time: '17:30',
+    venue: 'UNITEN Sports Complex Badminton Hall',
+    image_url: 'https://images.unsplash.com/photo-1521537634581-0dced2fee2ef?auto=format&fit=crop&q=80&w=800',
+    requested_by_name: 'UNITEN Badminton Club',
+    status: 'approved',
+    registrations: 64,
+    scorun: 3
+  },
+  {
+    id: '7',
+    title: 'Campus Blood Donation & Health Screening Drive',
+    category: 'Other',
+    description: 'Be a hero, save lives! Join our annual blood donation drive and get free basic health screenings (blood pressure, blood glucose, BMI index check).',
+    event_date: '2026-08-18',
+    start_time: '09:00',
+    end_time: '16:00',
+    venue: 'Dewan Sri Sarjana Foyer',
+    image_url: 'https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&q=80&w=800',
+    requested_by_name: 'Red Crescent Society',
+    status: 'approved',
+    registrations: 88,
+    scorun: 1
   }
 ];
 
@@ -1120,6 +1165,40 @@ function renderEvent(eventId) {
   const dateStr = formatEventDateRange(ev.event_date);
   const timeStr = formatEventTimeRange(ev.start_time, ev.end_time);
   const isRSVPd = hasRSVPd(eventId);
+  
+  let rsvpBtnHtml = '';
+  let rsvpSubtextHtml = '';
+  
+  if (!currentUser) {
+    rsvpBtnHtml = `
+      <button id="rsvp-btn" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 0.875rem;" disabled title="Please login to register">
+        ${TRANSLATIONS[currentLang]?.btn_register || 'Register Now'}
+      </button>
+    `;
+    rsvpSubtextHtml = `<p style="text-align: center; font-size: 0.8rem; color: var(--text-muted); margin: 0;"><a href="#login" style="color: var(--amber); text-decoration: none;">Login</a> to register</p>`;
+  } else if (currentUser.role === 'admin') {
+    const adminCantRegisterText = currentLang === 'en' 
+      ? 'Admins Cannot Register' 
+      : 'Admin Tidak Boleh Daftar';
+    const adminCantRegisterSubtext = currentLang === 'en'
+      ? 'Registration is restricted to students and committee members.'
+      : 'Pendaftaran terhad kepada pelajar dan ahli jawatankuasa sahaja.';
+      
+    rsvpBtnHtml = `
+      <button id="rsvp-btn" class="btn btn-outline" style="width: 100%; justify-content: center; padding: 0.875rem; cursor: not-allowed; opacity: 0.6;" disabled>
+        ${adminCantRegisterText}
+      </button>
+    `;
+    rsvpSubtextHtml = `<p style="text-align: center; font-size: 0.8rem; color: var(--amber); margin: 0; line-height: 1.4;">${adminCantRegisterSubtext}</p>`;
+  } else {
+    rsvpBtnHtml = `
+      <button id="rsvp-btn" onclick="toggleRSVP('${eventId}')" class="btn ${isRSVPd ? 'btn-outline' : 'btn-primary'}" style="width: 100%; justify-content: center; padding: 0.875rem;">
+        ${isRSVPd 
+          ? (TRANSLATIONS[currentLang]?.btn_cancel_register || 'Cancel Registration') 
+          : (TRANSLATIONS[currentLang]?.btn_register || 'Register Now')}
+      </button>
+    `;
+  }
   const category = escapeHTML(ev.category);
   const title = escapeHTML(ev.title);
   const description = escapeHTML(ev.description);
@@ -1199,14 +1278,9 @@ function renderEvent(eventId) {
             <strong style="font-size: 1.1rem; color: var(--text-main);">${ev.registrations || 0}</strong>
           </div>
           
-          <button id="rsvp-btn" onclick="toggleRSVP('${eventId}')" class="btn ${isRSVPd ? 'btn-outline' : 'btn-primary'}" style="width: 100%; justify-content: center; padding: 0.875rem;" ${!currentUser ? 'disabled title="Please login to register"' : ''}>
-            ${isRSVPd 
-              ? (TRANSLATIONS[currentLang]?.btn_cancel_register || 'Cancel Registration') 
-              : (TRANSLATIONS[currentLang]?.btn_register || 'Register Now')}
-          </button>
+          ${rsvpBtnHtml}
           
-          ${!currentUser ? '<p style="text-align: center; font-size: 0.8rem; color: var(--text-muted); margin: 0;"><a href="#login" style="color: var(--amber); text-decoration: none;">Login</a> to register</p>' : ''}
-          ${currentUser && currentUser.role === 'admin' ? `<p style="text-align: center; font-size: 0.8rem; color: var(--amber); margin: 0;">${TRANSLATIONS[currentLang]?.admin_bypass || 'Admins bypass approval'}</p>` : ''}
+          ${rsvpSubtextHtml}
         </div>
       </div>
     </div>
@@ -1219,35 +1293,173 @@ function hasRSVPd(eventId) {
   return rsvps.some(r => r.event_id === eventId && r.user_id === currentUser.id);
 }
 
-function toggleRSVP(eventId) {
-  if (!currentUser) return;
-  const btn = document.getElementById('rsvp-btn');
-  btn.style.opacity = '0.7';
-  btn.innerHTML = `<span class="spin" style="margin-right: 0.5rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg></span> ${TRANSLATIONS[currentLang]?.btn_processing || 'Processing...'}`;
+function saveUserEmail(userId, email) {
+  if (currentUser && currentUser.id === userId) {
+    currentUser.email = email;
+    localStorage.setItem('uni_user', JSON.stringify(currentUser));
+  }
+  const users = safeParseJSON('uni_users', SEED_USERS);
+  const uIdx = users.findIndex(u => u.id === userId);
+  if (uIdx !== -1) {
+    users[uIdx].email = email;
+    localStorage.setItem('uni_users', JSON.stringify(users));
+  }
+}
 
+function openRegistrationEmailModal(eventId, onConfirm) {
+  const overlay = document.createElement('div');
+  overlay.className = 'registration-modal-overlay';
+  
+  const isMalay = currentLang === 'my';
+  const titleText = isMalay ? 'Sahkan Pendaftaran' : 'Confirm Registration';
+  const bodyText = isMalay 
+    ? 'Sila masukkan e-mel anda untuk menerima kemas kini pendaftaran dan tiket masuk anda.' 
+    : 'Please enter your email to receive registration updates and your entry ticket.';
+  const labelText = isMalay ? 'Alamat E-mel' : 'Email Address';
+  const placeholderText = isMalay ? 'cth. nama@domain.com' : 'e.g. name@domain.com';
+  const cancelText = isMalay ? 'Batal' : 'Cancel';
+  const confirmText = isMalay ? 'Sahkan' : 'Confirm';
+  const emptyErrorText = isMalay ? 'E-mel tidak boleh kosong.' : 'Email cannot be empty.';
+  const invalidErrorText = isMalay ? 'Sila masukkan alamat e-mel yang sah.' : 'Please enter a valid email address.';
+
+  const initialEmail = currentUser && currentUser.email ? currentUser.email : '';
+
+  overlay.innerHTML = `
+    <div class="registration-modal-card">
+      <div class="registration-modal-header">
+        <h3 class="registration-modal-title">${titleText}</h3>
+        <button class="registration-modal-close-btn" aria-label="Close">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <p class="registration-modal-body">${bodyText}</p>
+      <div class="registration-modal-input-group">
+        <label class="registration-modal-label" for="registration-email-input">${labelText}</label>
+        <input type="email" id="registration-email-input" class="registration-modal-input" placeholder="${placeholderText}" value="${initialEmail}" required>
+        <div id="registration-email-error" class="registration-modal-input-error-text"></div>
+      </div>
+      <div class="registration-modal-footer">
+        <button class="registration-modal-btn registration-modal-btn-cancel">${cancelText}</button>
+        <button class="registration-modal-btn registration-modal-btn-confirm">${confirmText}</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  requestAnimationFrame(() => {
+    overlay.classList.add('show');
+  });
+
+  const input = overlay.querySelector('#registration-email-input');
+  const errorDiv = overlay.querySelector('#registration-email-error');
+  
   setTimeout(() => {
-    let rsvps = JSON.parse(localStorage.getItem('uni_rsvps') || '[]');
-    let events = getEvents();
-    const evIdx = events.findIndex(e => e.id === eventId);
-    
-    if (hasRSVPd(eventId)) {
-      rsvps = rsvps.filter(r => !(r.event_id === eventId && r.user_id === currentUser.id));
-      if (evIdx !== -1) {
-        events[evIdx].registrations = Math.max(0, (events[evIdx].registrations || 0) - 1);
-      }
-      showToast('Registration cancelled', 'info');
-    } else {
-      rsvps.push({ event_id: eventId, user_id: currentUser.id, timestamp: new Date().toISOString() });
-      if (evIdx !== -1) {
-        events[evIdx].registrations = (events[evIdx].registrations || 0) + 1;
-      }
-      showToast('Successfully registered for event!');
+    input.focus();
+    input.select();
+  }, 100);
+
+  const closeModal = () => {
+    overlay.classList.remove('show');
+    overlay.addEventListener('transitionend', () => {
+      overlay.remove();
+    }, { once: true });
+  };
+
+  const handleConfirmSubmit = () => {
+    const emailValue = input.value.trim();
+    if (!emailValue) {
+      input.classList.add('input-error');
+      errorDiv.textContent = emptyErrorText;
+      errorDiv.style.display = 'block';
+      return;
     }
-    
-    localStorage.setItem('uni_rsvps', JSON.stringify(rsvps));
-    saveEvents(events);
-    renderEvent(eventId);
-  }, 500);
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailValue)) {
+      input.classList.add('input-error');
+      errorDiv.textContent = invalidErrorText;
+      errorDiv.style.display = 'block';
+      return;
+    }
+
+    input.classList.remove('input-error');
+    errorDiv.style.display = 'none';
+
+    saveUserEmail(currentUser.id, emailValue);
+    closeModal();
+    onConfirm(emailValue);
+  };
+
+  overlay.querySelector('.registration-modal-close-btn').addEventListener('click', closeModal);
+  overlay.querySelector('.registration-modal-btn-cancel').addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) closeModal();
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleConfirmSubmit();
+    }
+  });
+
+  const escHandler = (e) => {
+    if (e.key === 'Escape') {
+      closeModal();
+      document.removeEventListener('keydown', escHandler);
+    }
+  };
+  document.addEventListener('keydown', escHandler);
+
+  overlay.querySelector('.registration-modal-btn-confirm').addEventListener('click', handleConfirmSubmit);
+}
+
+function toggleRSVP(eventId) {
+  if (!currentUser || currentUser.role === 'admin') return;
+  
+  const proceedRSVP = () => {
+    const btn = document.getElementById('rsvp-btn');
+    if (btn) {
+      btn.style.opacity = '0.7';
+      btn.innerHTML = `<span class="spin" style="margin-right: 0.5rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg></span> ${TRANSLATIONS[currentLang]?.btn_processing || 'Processing...'}`;
+    }
+
+    setTimeout(() => {
+      let rsvps = JSON.parse(localStorage.getItem('uni_rsvps') || '[]');
+      let events = getEvents();
+      const evIdx = events.findIndex(e => e.id === eventId);
+      
+      if (hasRSVPd(eventId)) {
+        rsvps = rsvps.filter(r => !(r.event_id === eventId && r.user_id === currentUser.id));
+        if (evIdx !== -1) {
+          events[evIdx].registrations = Math.max(0, (events[evIdx].registrations || 0) - 1);
+        }
+        showToast('Registration cancelled', 'info');
+      } else {
+        rsvps.push({ event_id: eventId, user_id: currentUser.id, timestamp: new Date().toISOString() });
+        if (evIdx !== -1) {
+          events[evIdx].registrations = (events[evIdx].registrations || 0) + 1;
+        }
+        showToast('Successfully registered for event!');
+      }
+      
+      localStorage.setItem('uni_rsvps', JSON.stringify(rsvps));
+      saveEvents(events);
+      renderEvent(eventId);
+    }, 500);
+  };
+
+  if (hasRSVPd(eventId)) {
+    proceedRSVP();
+  } else {
+    openRegistrationEmailModal(eventId, (email) => {
+      proceedRSVP();
+    });
+  }
 }
 
 // --- MY EVENTS VIEW ---

@@ -58,5 +58,50 @@
     "status": "approved",
     "registrations": 34,
     "scorun": 1
+  },
+  {
+    "id": "5",
+    "title": "UNITEN Cultural Night & Food Bazaar",
+    "category": "Social",
+    "description": "Experience the diverse cultures of our student community! Enjoy traditional performances, games, and delicious food stalls from various states and countries.",
+    "event_date": "2026-08-05",
+    "start_time": "18:00",
+    "end_time": "23:00",
+    "venue": "Student Activity Center (SAC) Courtyard",
+    "image_url": "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?auto=format&fit=crop&q=80&w=800",
+    "requested_by_name": "International Student Association",
+    "status": "approved",
+    "registrations": 150,
+    "scorun": 2
+  },
+  {
+    "id": "6",
+    "title": "UNITEN Inter-College Badminton Championship",
+    "category": "Sports",
+    "description": "Smash your way to victory! Compete against other colleges in single and double categories. Amazing prizes and medals await the winners.",
+    "event_date": "2026-08-12",
+    "start_time": "08:30",
+    "end_time": "17:30",
+    "venue": "UNITEN Sports Complex Badminton Hall",
+    "image_url": "https://images.unsplash.com/photo-1521537634581-0dced2fee2ef?auto=format&fit=crop&q=80&w=800",
+    "requested_by_name": "UNITEN Badminton Club",
+    "status": "approved",
+    "registrations": 64,
+    "scorun": 3
+  },
+  {
+    "id": "7",
+    "title": "Campus Blood Donation & Health Screening Drive",
+    "category": "Other",
+    "description": "Be a hero, save lives! Join our annual blood donation drive and get free basic health screenings (blood pressure, blood glucose, BMI index check).",
+    "event_date": "2026-08-18",
+    "start_time": "09:00",
+    "end_time": "16:00",
+    "venue": "Dewan Sri Sarjana Foyer",
+    "image_url": "https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&q=80&w=800",
+    "requested_by_name": "Red Crescent Society",
+    "status": "approved",
+    "registrations": 88,
+    "scorun": 1
   }
 ]
