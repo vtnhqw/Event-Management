@@ -77,9 +77,9 @@ const TRANSLATIONS = {
     lbl_title: "Event Title", lbl_category: "Category", lbl_desc: "Description", lbl_date: "Date", lbl_venue: "Venue", lbl_start: "Start Time", lbl_end: "End Time", lbl_image: "Image URL (Optional)", btn_submit_approval: "Submit for Approval",
     lbl_location_type: "Location Type", loc_physical: "Physical", loc_online: "Online", lbl_platform: "Online Platform", platform_other: "Other",
     filter_month_all: "All Months", month_01: "January", month_02: "February", month_03: "March", month_04: "April", month_05: "May", month_06: "June", month_07: "July", month_08: "August", month_09: "September", month_10: "October", month_11: "November", month_12: "December",
-    lbl_date_start: "Date & Start", add_location: "Add Event Location", ph_offline: "e.g. Offline location", ph_virtual: "Platform", add_desc: "Add Description", ph_desc: "Offline location or virtual link", event_options: "Event Options", require_approval: "Require Approval", scorun_points: "SCORUN Points", btn_create_event: "Create Event", submit_success_title: "Submitted successfully", submit_success_sub: "Your event is now awaiting admin approval.", ph_event_name: "Event Name", card_going: "going", card_view: "View &rarr;"
+    lbl_date_start: "Date & Start", add_location: "Add Event Location", ph_offline: "e.g. Offline location", ph_virtual: "Platform", add_desc: "Add Description", ph_desc: "Offline location or virtual link", event_options: "Event Options", require_approval: "Require Approval", scorun_points: "SCORUN Points", btn_create_event: "Create Event", submit_success_title: "Submitted successfully", submit_success_sub: "Your event is now awaiting admin approval.", ph_event_name: "Event Name", card_going: "going", card_view: "View &rarr;", image_url_notice: "We only accept online image URLs. Direct image file uploads are not supported.", btn_back: "Back to Events", btn_cancel_register: "Cancel Registration", admin_bypass: "Admins bypass approval", btn_processing: "Processing..."
   },
-  ms: {
+  my: {
     nav_submit: "Hantar Acara", nav_my_events: "Acara Saya", nav_admin: "Papan Pemuka Admin", nav_logout: "Log Keluar",
     role_student: "PELAJAR", role_committee: "JAWATANKUASA", role_admin: "ADMIN",
     discover_title: "Teroka Acara", discover_subtitle: "Cari dan sertai aktiviti di UNITEN",
@@ -93,13 +93,17 @@ const TRANSLATIONS = {
     lbl_title: "Tajuk Acara", lbl_category: "Kategori", lbl_desc: "Penerangan", lbl_date: "Tarikh", lbl_venue: "Tempat", lbl_start: "Masa Mula", lbl_end: "Masa Tamat", lbl_image: "URL Imej (Pilihan)", btn_submit_approval: "Hantar untuk Kelulusan",
     lbl_location_type: "Jenis Lokasi", loc_physical: "Fizikal", loc_online: "Dalam Talian", lbl_platform: "Platform Dalam Talian", platform_other: "Lain-lain",
     filter_month_all: "Semua Bulan", month_01: "Januari", month_02: "Februari", month_03: "Mac", month_04: "April", month_05: "Mei", month_06: "Jun", month_07: "Julai", month_08: "Ogos", month_09: "September", month_10: "Oktober", month_11: "November", month_12: "Disember",
-    lbl_date_start: "Tarikh & Mula", add_location: "Tambah Lokasi Acara", ph_offline: "cth. Lokasi fizikal", ph_virtual: "Platform", add_desc: "Tambah Penerangan", ph_desc: "Lokasi fizikal atau pautan maya", event_options: "Pilihan Acara", require_approval: "Perlukan Kelulusan", scorun_points: "Mata SCORUN", btn_create_event: "Cipta Acara", submit_success_title: "Dihantar dengan berjaya", submit_success_sub: "Acara anda kini menunggu kelulusan admin.", ph_event_name: "Nama Acara", card_going: "hadir", card_view: "Lihat &rarr;"
+    lbl_date_start: "Tarikh & Mula", add_location: "Tambah Lokasi Acara", ph_offline: "cth. Lokasi fizikal", ph_virtual: "Platform", add_desc: "Tambah Penerangan", ph_desc: "Lokasi fizikal atau pautan maya", event_options: "Pilihan Acara", require_approval: "Perlukan Kelulusan", scorun_points: "Mata SCORUN", btn_create_event: "Cipta Acara", submit_success_title: "Dihantar dengan berjaya", submit_success_sub: "Acara anda kini menunggu kelulusan admin.", ph_event_name: "Nama Acara", card_going: "hadir", card_view: "Lihat &rarr;", image_url_notice: "Kami hanya menerima URL gambar dalam talian. Muat naik fail gambar secara langsung tidak disokong.", btn_back: "Kembali ke Acara", btn_cancel_register: "Batal Pendaftaran", admin_bypass: "Admin mengecualikan kelulusan", btn_processing: "Memproses..."
   }
 };
 
 let currentUser = JSON.parse(localStorage.getItem('uni_user') || 'null');
 let isDarkMode = localStorage.getItem('uni_theme') === 'dark';
 let currentLang = localStorage.getItem('uni_lang') || 'en';
+if (currentLang === 'ms') {
+  currentLang = 'my';
+  localStorage.setItem('uni_lang', 'my');
+}
 let authCarouselTimer = null;
 
 function applyTheme() {
@@ -149,7 +153,7 @@ function toggleTheme() {
 }
 
 function toggleLang() {
-  currentLang = currentLang === 'en' ? 'ms' : 'en';
+  currentLang = currentLang === 'en' ? 'my' : 'en';
   localStorage.setItem('uni_lang', currentLang);
   const btn = document.getElementById('lang-toggle-btn');
   if (btn) btn.textContent = currentLang.toUpperCase();
@@ -194,7 +198,7 @@ function initDB() {
   }
 }
 
-function showToast(message) {
+function showToast(message, type = 'success') {
   let container = document.getElementById('toast-container');
   if (!container) {
     container = document.createElement('div');
@@ -203,12 +207,20 @@ function showToast(message) {
   }
   
   const toast = document.createElement('div');
-  toast.className = 'modern-toast';
-  toast.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent);"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg> <span>${message}</span>`;
+  toast.className = `modern-toast toast-${type}`;
   
+  let iconHtml = '';
+  if (type === 'error' || type === 'warning') {
+    iconHtml = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--amber)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+  } else if (type === 'info') {
+    iconHtml = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
+  } else {
+    iconHtml = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
+  }
+  
+  toast.innerHTML = `${iconHtml} <span>${message}</span>`;
   container.appendChild(toast);
   
-  // Trigger animation
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       toast.classList.add('show');
@@ -220,7 +232,7 @@ function showToast(message) {
     toast.classList.add('hiding');
     setTimeout(() => {
       if (toast.parentNode) toast.parentNode.removeChild(toast);
-    }, 400); // Wait for transition
+    }, 400);
   }, 4000);
 }
 
@@ -307,6 +319,8 @@ function handleLogout() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  initDB();
+  
   // Always create nav container for SPA
   if (!document.getElementById('navbar-container')) {
     const navDiv = document.createElement('div');
@@ -391,6 +405,30 @@ document.addEventListener('click', (e) => {
         icon.style.transform = 'rotate(0)';
     }
   }
+  if (!e.target.closest('#category-dropdown')) {
+    const menu = document.getElementById('category-menu');
+    const icon = document.getElementById('category-icon');
+    if(menu && menu.classList.contains('show')) {
+        menu.classList.remove('show');
+        icon.style.transform = 'rotate(0)';
+    }
+  }
+  if (!e.target.closest('#scorun-dropdown')) {
+    const menu = document.getElementById('scorun-menu');
+    const icon = document.getElementById('scorun-icon');
+    if(menu && menu.classList.contains('show')) {
+        menu.classList.remove('show');
+        icon.style.transform = 'rotate(0)';
+    }
+  }
+  if (!e.target.closest('#platform-dropdown')) {
+    const menu = document.getElementById('platform-menu');
+    const icon = document.getElementById('platform-icon');
+    if(menu && menu.classList.contains('show')) {
+        menu.classList.remove('show');
+        icon.style.transform = 'rotate(0)';
+    }
+  }
 });
 
 function updateCategoryCounts(events) {
@@ -408,7 +446,11 @@ function renderEvents() {
   const grid = document.getElementById('events-grid');
   if(!grid) return;
   let allEvents = JSON.parse(localStorage.getItem('uni_events') || '[]').filter(e => e.status === 'approved');
-  allEvents.sort((a, b) => new Date(a.event_date) - new Date(b.event_date));
+  allEvents.sort((a, b) => {
+    const dateA = new Date(a.event_date ? a.event_date.split(' to ')[0] : '');
+    const dateB = new Date(b.event_date ? b.event_date.split(' to ')[0] : '');
+    return dateA - dateB;
+  });
 
   const monthEvents = allEvents.filter(e => {
     const eventMonth = e.event_date ? e.event_date.split('-')[1] : null;
@@ -436,7 +478,7 @@ function renderEvents() {
       grid.innerHTML = `
         <div class="animate-in" style="grid-column: 1 / -1; padding: 5rem 1rem; text-align: center; opacity: 0;">
           <div style="width: 72px; height: 72px; border-radius: 50%; background: var(--hover-bg); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: var(--text-muted);">
-            <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="var(--border-color)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 1.5rem;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><path d="M11 8v6"></path><path d="M8 11h6"></path></svg>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><path d="M11 8v6"></path><path d="M8 11h6"></path></svg>
           </div>
           <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;" data-i18n="empty_events">No events found</h3>
           <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 280px; margin: 0 auto;" data-i18n="empty_events_sub">There are no approved events in this category yet.</p>
@@ -448,8 +490,7 @@ function renderEvents() {
     
     grid.innerHTML = filtered.map((event, index) => {
       const count = event.registrations || 0;
-      const dateObj = new Date(event.event_date + 'T00:00:00');
-      const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const dateStr = formatEventDateRangeShort(event.event_date);
       const timeStr = event.start_time ? event.start_time.slice(0,5) : null;
       
       return `
@@ -614,7 +655,7 @@ function renderPending(events) {
     container.innerHTML = `
       <div style="padding: 4rem 1rem; text-align: center; background: var(--card-bg); border-radius: 1.25rem; border: 1px dashed var(--border-color); display: flex; flex-direction: column; align-items: center; justify-content: center;">
         <div style="color: var(--amber); margin-bottom: 1.25rem; opacity: 0.9; width: 64px; height: 64px; background: rgba(217, 164, 65, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-          <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="var(--border-color)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 1.5rem;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
         </div>
         <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;" data-i18n="all_caught_up">All caught up!</h3>
         <p style="color: var(--text-muted); font-size: 0.95rem;" data-i18n="no_pending_events">There are no events waiting for approval.</p>
@@ -634,7 +675,7 @@ function renderPending(events) {
           <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; flex-wrap: wrap; gap: 0.5rem;">
             <span>By <strong>${ev.requested_by_name || 'Unknown'}</strong></span>
             <span>&bull;</span>
-            <span>${ev.event_date}</span>
+            <span>${formatEventDateRangeShort(ev.event_date)}</span>
             <span>&bull;</span>
             <span>${ev.venue}</span>
           </div>
@@ -676,7 +717,7 @@ function renderDecided(events) {
     <div class="card" style="padding: 1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
       <div style="min-width: 0;">
         <h4 style="font-weight: 600; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-main);"><a href="#event?id=${ev.id}" style="color: inherit; text-decoration: none;">${ev.title}</a></h4>
-        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem;">By ${ev.requested_by_name || 'Unknown'} &bull; ${ev.event_date}</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem;">By ${ev.requested_by_name || 'Unknown'} &bull; ${formatEventDateRangeShort(ev.event_date)}</div>
       </div>
       <span class="badge badge-${ev.status}" style="flex-shrink: 0;">${ev.status}</span>
     </div>
@@ -697,7 +738,11 @@ function handleDecision(id, status, reason = null) {
       events[idx].status = status;
       events[idx].reject_reason = reason;
       localStorage.setItem('uni_events', JSON.stringify(events));
-      showToast(status === 'approved' ? 'Event approved successfully' : 'Event rejected');
+      if (status === 'approved') {
+        showToast('Event approved successfully', 'success');
+      } else {
+        showToast('Event rejected', 'error');
+      }
       loadAdminData();
     }
   }, 300);
@@ -717,7 +762,7 @@ function cancelReject(id) {
 function submitReject(id) {
   const reason = document.getElementById(`reject-reason-${id}`).value.trim();
   if (!reason) {
-    showToast('Please enter a rejection reason');
+    showToast('Please enter a rejection reason', 'error');
     document.getElementById(`reject-reason-${id}`).focus();
     return;
   }
@@ -760,8 +805,7 @@ function renderEvent(eventId) {
     return;
   }
 
-  const dateObj = new Date(ev.event_date + 'T00:00:00');
-  const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  const dateStr = formatEventDateRange(ev.event_date);
   const timeStr = (ev.start_time ? ev.start_time.slice(0,5) : '') + (ev.end_time ? ' - ' + ev.end_time.slice(0,5) : '');
   const isRSVPd = hasRSVPd(eventId);
 
@@ -770,6 +814,14 @@ function renderEvent(eventId) {
     : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>`;
 
   container.innerHTML = `
+    <!-- Back to Discover Button -->
+    <div style="max-width: 1000px; margin: 0 auto 1.5rem;">
+      <a href="#discover" style="display: inline-flex; align-items: center; gap: 0.5rem; color: var(--text-muted); text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: color 0.2s;" onmouseover="this.style.color='var(--text-main)'" onmouseout="this.style.color='var(--text-muted)'">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        <span data-i18n="btn_back">${TRANSLATIONS[currentLang]?.btn_back || 'Back to Events'}</span>
+      </a>
+    </div>
+
     <div style="display: grid; grid-template-columns: 1fr; gap: 2rem; align-items: start; max-width: 1000px; margin: 0 auto;">
       <div style="display: flex; flex-direction: column; gap: 1.5rem;">
         <div style="aspect-ratio: 16/9; background: var(--hover-bg); border-radius: 1rem; overflow: hidden; position: relative;">
@@ -777,7 +829,7 @@ function renderEvent(eventId) {
             ? `<img src="${ev.image_url}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null; this.outerHTML='<div style=\\'width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--border-color);\\'><svg width=\\'64\\' height=\\'64\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'1.5\\'><rect x=\\'3\\' y=\\'3\\' width=\\'18\\' height=\\'18\\' rx=\\'2\\' ry=\\'2\\'></rect><circle cx=\\'8.5\\' cy=\\'8.5\\' r=\\'1.5\\'></circle><polyline points=\\'21 15 16 10 5 21\\'></polyline></svg></div>';">`
             : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--border-color);"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></div>`}
         </div>
-
+ 
         <div>
           <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
             <span class="badge badge-cat-${ev.category.toLowerCase()}">${ev.category}</span>
@@ -806,12 +858,12 @@ function renderEvent(eventId) {
               </div>
             </div>
           </div>
-
+ 
           <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-main);" data-i18n="about_event">About this event</h3>
           <p style="color: var(--text-muted); line-height: 1.7; font-size: 1rem;">${ev.description}</p>
         </div>
       </div>
-
+ 
       <div style="position: sticky; top: 2rem;">
         <div class="card" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;">
           <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin: 0;">Registration</h3>
@@ -825,11 +877,13 @@ function renderEvent(eventId) {
           </div>
           
           <button id="rsvp-btn" onclick="toggleRSVP('${eventId}')" class="btn ${isRSVPd ? 'btn-outline' : 'btn-primary'}" style="width: 100%; justify-content: center; padding: 0.875rem;" ${!currentUser ? 'disabled title="Please login to register"' : ''}>
-            ${isRSVPd ? 'Cancel Registration' : (TRANSLATIONS[currentLang] ? TRANSLATIONS[currentLang].btn_register : 'Register Now')}
+            ${isRSVPd 
+              ? (TRANSLATIONS[currentLang]?.btn_cancel_register || 'Cancel Registration') 
+              : (TRANSLATIONS[currentLang]?.btn_register || 'Register Now')}
           </button>
           
           ${!currentUser ? '<p style="text-align: center; font-size: 0.8rem; color: var(--text-muted); margin: 0;"><a href="#login" style="color: var(--amber); text-decoration: none;">Login</a> to register</p>' : ''}
-          ${currentUser && currentUser.role === 'admin' ? '<p style="text-align: center; font-size: 0.8rem; color: var(--amber); margin: 0;">Admins bypass approval</p>' : ''}
+          ${currentUser && currentUser.role === 'admin' ? `<p style="text-align: center; font-size: 0.8rem; color: var(--amber); margin: 0;">${TRANSLATIONS[currentLang]?.admin_bypass || 'Admins bypass approval'}</p>` : ''}
         </div>
       </div>
     </div>
@@ -846,7 +900,7 @@ function toggleRSVP(eventId) {
   if (!currentUser) return;
   const btn = document.getElementById('rsvp-btn');
   btn.style.opacity = '0.7';
-  btn.innerHTML = '<span class="spin" style="margin-right: 0.5rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg></span> Processing...';
+  btn.innerHTML = `<span class="spin" style="margin-right: 0.5rem;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg></span> ${TRANSLATIONS[currentLang]?.btn_processing || 'Processing...'}`;
 
   setTimeout(() => {
     let rsvps = JSON.parse(localStorage.getItem('uni_rsvps') || '[]');
@@ -858,7 +912,7 @@ function toggleRSVP(eventId) {
       if (evIdx !== -1) {
         events[evIdx].registrations = Math.max(0, (events[evIdx].registrations || 0) - 1);
       }
-      showToast('Registration cancelled');
+      showToast('Registration cancelled', 'info');
     } else {
       rsvps.push({ event_id: eventId, user_id: currentUser.id, timestamp: new Date().toISOString() });
       if (evIdx !== -1) {
@@ -921,7 +975,7 @@ function loadMyEvents() {
         <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; font-size: 0.85rem; color: var(--text-muted);">
           <div style="display: flex; align-items: center; gap: 0.5rem;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-            ${ev.event_date} &bull; ${ev.start_time}
+            ${formatEventDateRangeShort(ev.event_date)} &bull; ${ev.start_time.slice(0,5)}
           </div>
           <div style="display: flex; align-items: center; gap: 0.5rem;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
@@ -940,6 +994,364 @@ function loadMyEvents() {
   }).join('');
 }
 
+// --- SUBMIT VIEW HELPER FUNCTIONS ---
+window.toggleCategoryDropdown = function() {
+  const menu = document.getElementById('category-menu');
+  const icon = document.getElementById('category-icon');
+  if(!menu) return;
+  menu.classList.toggle('show');
+  if (menu.classList.contains('show')) {
+    icon.style.transform = 'rotate(180deg)';
+  } else {
+    icon.style.transform = 'rotate(0)';
+  }
+};
+
+window.toggleScorunDropdown = function() {
+  const menu = document.getElementById('scorun-menu');
+  const icon = document.getElementById('scorun-icon');
+  if(!menu) return;
+  menu.classList.toggle('show');
+  if (menu.classList.contains('show')) {
+    icon.style.transform = 'rotate(180deg)';
+  } else {
+    icon.style.transform = 'rotate(0)';
+  }
+};
+
+window.togglePlatformDropdown = function() {
+  const menu = document.getElementById('platform-menu');
+  const icon = document.getElementById('platform-icon');
+  if(!menu) return;
+  menu.classList.toggle('show');
+  if (menu.classList.contains('show')) {
+    icon.style.transform = 'rotate(180deg)';
+  } else {
+    icon.style.transform = 'rotate(0)';
+  }
+};
+
+window.toggleLoc = function() {
+  const isPhysical = document.getElementById('loc_physical').checked;
+  const physicalWrap = document.getElementById('loc-physical-wrap');
+  const onlineWrap = document.getElementById('loc-online-wrap');
+  const physicalInput = document.getElementById('ev-venue-physical');
+  const otherInput = document.getElementById('ev-venue-other');
+
+  if (isPhysical) {
+    physicalWrap.style.display = 'block';
+    physicalInput.required = true;
+    onlineWrap.style.display = 'none';
+    otherInput.required = false;
+  } else {
+    physicalWrap.style.display = 'none';
+    physicalInput.required = false;
+    onlineWrap.style.display = 'flex';
+    // Only require otherInput if platform is 'Other'
+    const platformActiveBtn = document.querySelector('.platform-option.active');
+    const isOtherPlatform = platformActiveBtn && platformActiveBtn.getAttribute('data-val') === 'Other';
+    otherInput.required = isOtherPlatform;
+  }
+};
+
+// --- CUSTOM DATE/TIME PICKER ENGINE ---
+let customCurrentYear = new Date().getFullYear();
+let customCurrentMonth = new Date().getMonth();
+let currentPickerInputId = 'ev-date';
+let currentTimeInputId = 'ev-start';
+let selectedHours = { 'ev-start': '09', 'ev-end': '17', 'ev-start-time-multi': '09', 'ev-end-time-multi': '17' };
+let selectedMinutes = { 'ev-start': '00', 'ev-end': '00', 'ev-start-time-multi': '00', 'ev-end-time-multi': '00' };
+
+window.openCustomDatePicker = function(inputId, e) {
+  if (e) e.stopPropagation();
+  closeAllCustomPickers();
+  currentPickerInputId = inputId;
+  
+  const popup = document.getElementById('custom-calendar-popup');
+  const input = document.getElementById(inputId);
+  if (popup && input) {
+    document.body.appendChild(popup);
+    const rect = input.getBoundingClientRect();
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+    
+    popup.style.top = `${rect.bottom + scrollTop + 8}px`;
+    popup.style.left = `${rect.left + scrollLeft}px`;
+    
+    popup.classList.remove('hidden');
+    renderCustomCalendar();
+  }
+};
+
+window.changeCustomMonth = function(offset, e) {
+  if (e) e.stopPropagation();
+  customCurrentMonth += offset;
+  if (customCurrentMonth < 0) {
+    customCurrentMonth = 11;
+    customCurrentYear--;
+  } else if (customCurrentMonth > 11) {
+    customCurrentMonth = 0;
+    customCurrentYear++;
+  }
+  renderCustomCalendar();
+};
+
+function renderCustomCalendar() {
+  const display = document.getElementById('calendar-month-year-display');
+  const grid = document.getElementById('calendar-days-grid');
+  if (!display || !grid) return;
+  
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  display.innerText = `${months[customCurrentMonth]} ${customCurrentYear}`;
+  
+  grid.innerHTML = '';
+  
+  const firstDayIndex = new Date(customCurrentYear, customCurrentMonth, 1).getDay();
+  const lastDayDate = new Date(customCurrentYear, customCurrentMonth + 1, 0).getDate();
+  
+  for (let i = 0; i < firstDayIndex; i++) {
+    const cell = document.createElement('div');
+    cell.className = 'calendar-day-cell empty';
+    grid.appendChild(cell);
+  }
+  
+  const today = new Date();
+  const todayDate = today.getDate();
+  const todayMonth = today.getMonth();
+  const todayYear = today.getFullYear();
+  
+  const inputVal = document.getElementById(currentPickerInputId).value;
+  let activeD = null, activeM = null, activeY = null;
+  if (inputVal) {
+    const parts = inputVal.split('-');
+    activeY = parseInt(parts[0], 10);
+    activeM = parseInt(parts[1], 10) - 1;
+    activeD = parseInt(parts[2], 10);
+  }
+  
+  for (let d = 1; d <= lastDayDate; d++) {
+    const cell = document.createElement('div');
+    cell.className = 'calendar-day-cell';
+    cell.innerText = d;
+    
+    const cellDate = new Date(customCurrentYear, customCurrentMonth, d);
+    const dateCompare = new Date(todayYear, todayMonth, todayDate);
+    
+    if (currentPickerInputId === 'ev-end-date') {
+      const startDateVal = document.getElementById('ev-start-date').value;
+      if (startDateVal) {
+        const startParts = startDateVal.split('-');
+        const startDateObj = new Date(parseInt(startParts[0], 10), parseInt(startParts[1], 10) - 1, parseInt(startParts[2], 10));
+        if (cellDate < startDateObj) {
+          cell.classList.add('disabled');
+        }
+      }
+    }
+    
+    if (cellDate < dateCompare && !cell.classList.contains('disabled')) {
+      cell.classList.add('disabled');
+    }
+    
+    if (!cell.classList.contains('disabled')) {
+      cell.onclick = (e) => {
+        e.stopPropagation();
+        const formattedMonth = String(customCurrentMonth + 1).padStart(2, '0');
+        const formattedDay = String(d).padStart(2, '0');
+        const dateStr = `${customCurrentYear}-${formattedMonth}-${formattedDay}`;
+        document.getElementById(currentPickerInputId).value = dateStr;
+        closeAllCustomPickers();
+      };
+    }
+    
+    if (d === todayDate && customCurrentMonth === todayMonth && customCurrentYear === todayYear) {
+      cell.classList.add('today');
+    }
+    if (d === activeD && customCurrentMonth === activeM && customCurrentYear === activeY) {
+      cell.classList.add('active');
+    }
+    
+    grid.appendChild(cell);
+  }
+}
+
+window.openCustomTimePicker = function(inputId, e) {
+  if (e) e.stopPropagation();
+  closeAllCustomPickers();
+  currentTimeInputId = inputId;
+  
+  const popup = document.getElementById('custom-time-popup');
+  const input = document.getElementById(inputId);
+  if (popup && input) {
+    document.body.appendChild(popup);
+    const rect = input.getBoundingClientRect();
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+    
+    popup.style.top = `${rect.bottom + scrollTop + 8}px`;
+    popup.style.left = `${rect.left + scrollLeft}px`;
+    
+    popup.classList.remove('hidden');
+    renderCustomTimeCols(inputId);
+  }
+};
+
+function renderCustomTimeCols(inputId) {
+  const hourCol = document.getElementById('custom-hour-col');
+  const minCol = document.getElementById('custom-minute-col');
+  if (!hourCol || !minCol) return;
+  
+  hourCol.innerHTML = '';
+  minCol.innerHTML = '';
+  
+  const currentHour = selectedHours[inputId] || '09';
+  const currentMin = selectedMinutes[inputId] || '00';
+  
+  for (let h = 0; h < 24; h++) {
+    const hStr = String(h).padStart(2, '0');
+    const item = document.createElement('div');
+    item.className = `time-item ${hStr === currentHour ? 'selected' : ''}`;
+    item.innerText = hStr;
+    item.onclick = (e) => {
+      e.stopPropagation();
+      selectedHours[inputId] = hStr;
+      renderCustomTimeCols(inputId);
+    };
+    hourCol.appendChild(item);
+    if (hStr === currentHour) {
+      setTimeout(() => item.scrollIntoView({ block: 'center', behavior: 'smooth' }), 30);
+    }
+  }
+  
+  for (let m = 0; m < 60; m += 5) {
+    const mStr = String(m).padStart(2, '0');
+    const item = document.createElement('div');
+    item.className = `time-item ${mStr === currentMin ? 'selected' : ''}`;
+    item.innerText = mStr;
+    item.onclick = (e) => {
+      e.stopPropagation();
+      selectedMinutes[inputId] = mStr;
+      renderCustomTimeCols(inputId);
+    };
+    minCol.appendChild(item);
+    if (mStr === currentMin) {
+      setTimeout(() => item.scrollIntoView({ block: 'center', behavior: 'smooth' }), 30);
+    }
+  }
+}
+
+window.confirmCustomTime = function(e) {
+  if (e) e.stopPropagation();
+  const inputId = currentTimeInputId;
+  const timeStr = `${selectedHours[inputId] || '09'}:${selectedMinutes[inputId] || '00'}`;
+  document.getElementById(inputId).value = timeStr;
+  closeAllCustomPickers();
+};
+
+window.closeAllCustomPickers = function() {
+  document.getElementById('custom-calendar-popup')?.classList.add('hidden');
+  document.getElementById('custom-time-popup')?.classList.add('hidden');
+};
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('#custom-calendar-popup') && 
+      !e.target.closest('#ev-date') && 
+      !e.target.closest('#ev-start-date') && 
+      !e.target.closest('#ev-end-date')) {
+    document.getElementById('custom-calendar-popup')?.classList.add('hidden');
+  }
+  if (!e.target.closest('#custom-time-popup') && 
+      !e.target.closest('#ev-start') && 
+      !e.target.closest('#ev-end') && 
+      !e.target.closest('#ev-start-time-multi') && 
+      !e.target.closest('#ev-end-time-multi')) {
+    document.getElementById('custom-time-popup')?.classList.add('hidden');
+  }
+});
+
+// --- EVENT DATE FORMATTING HELPERS ---
+function formatEventDateRange(dateStr) {
+  if (!dateStr) return '';
+  if (!dateStr.includes(' to ')) {
+    const dateObj = new Date(dateStr + 'T00:00:00');
+    return dateObj.toLocaleDateString(currentLang === 'en' ? 'en-US' : 'ms-MY', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  }
+  
+  const parts = dateStr.split(' to ');
+  const startObj = new Date(parts[0] + 'T00:00:00');
+  const endObj = new Date(parts[1] + 'T00:00:00');
+  
+  const startDay = startObj.getDate();
+  const endDay = endObj.getDate();
+  const startMonth = startObj.toLocaleDateString(currentLang === 'en' ? 'en-US' : 'ms-MY', { month: 'long' });
+  const endMonth = endObj.toLocaleDateString(currentLang === 'en' ? 'en-US' : 'ms-MY', { month: 'long' });
+  const startYear = startObj.getFullYear();
+  const endYear = endObj.getFullYear();
+  
+  if (startYear === endYear) {
+    if (startMonth === endMonth) {
+      return `${startMonth} ${startDay} - ${endDay}, ${startYear}`;
+    } else {
+      return `${startMonth} ${startDay} - ${endMonth} ${endDay}, ${startYear}`;
+    }
+  } else {
+    return `${startMonth} ${startDay}, ${startYear} - ${endMonth} ${endDay}, ${endYear}`;
+  }
+}
+
+function formatEventDateRangeShort(dateStr) {
+  if (!dateStr) return '';
+  if (!dateStr.includes(' to ')) {
+    const dateObj = new Date(dateStr + 'T00:00:00');
+    return dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+  
+  const parts = dateStr.split(' to ');
+  const startObj = new Date(parts[0] + 'T00:00:00');
+  const endObj = new Date(parts[1] + 'T00:00:00');
+  
+  const startDay = startObj.getDate();
+  const endDay = endObj.getDate();
+  const startMonth = startObj.toLocaleDateString('en-US', { month: 'short' });
+  const endMonth = endObj.toLocaleDateString('en-US', { month: 'short' });
+  const startYear = startObj.getFullYear();
+  
+  if (startMonth === endMonth) {
+    return `${startMonth} ${startDay} - ${endDay}, ${startYear}`;
+  } else {
+    return `${startMonth} ${startDay} - ${endMonth} ${endDay}, ${startYear}`;
+  }
+}
+
+window.toggleDurationType = function() {
+  closeAllCustomPickers();
+  const isMulti = document.getElementById('dur_multi').checked;
+  const singleWrap = document.getElementById('single-day-wrap');
+  const multiWrap = document.getElementById('multi-day-wrap');
+  const evDate = document.getElementById('ev-date');
+  const evStart = document.getElementById('ev-start');
+  const evEnd = document.getElementById('ev-end');
+  const evStartDate = document.getElementById('ev-start-date');
+  const evEndDate = document.getElementById('ev-end-date');
+  
+  if (!isMulti) {
+    singleWrap.classList.remove('hidden-panel');
+    multiWrap.classList.add('hidden-panel');
+    evDate.required = true;
+    evStart.required = true;
+    evEnd.required = true;
+    evStartDate.required = false;
+    evEndDate.required = false;
+  } else {
+    singleWrap.classList.add('hidden-panel');
+    multiWrap.classList.remove('hidden-panel');
+    evDate.required = false;
+    evStart.required = false;
+    evEnd.required = false;
+    evStartDate.required = true;
+    evEndDate.required = true;
+  }
+};
+
 // --- SUBMIT VIEW ---
 function initSubmitView() {
   if (!checkAuth()) return;
@@ -948,6 +1360,69 @@ function initSubmitView() {
     return;
   }
   
+  // Reset selected picker values
+  customCurrentYear = new Date().getFullYear();
+  customCurrentMonth = new Date().getMonth();
+  closeAllCustomPickers();
+  
+  // Ensure checkboxes and toggle states are synchronized on load
+  const durMulti = document.getElementById('dur_multi');
+  if (durMulti) durMulti.checked = false;
+  toggleDurationType();
+  const submitSection = document.getElementById('submit-section');
+  const successSection = document.getElementById('success-section');
+  if (submitSection && successSection) {
+    submitSection.classList.remove('hidden');
+    successSection.classList.add('hidden');
+  }
+
+  // Category dropdown options selection
+  const categoryOptions = document.querySelectorAll('.category-option');
+  categoryOptions.forEach(opt => {
+    opt.onclick = (e) => {
+      categoryOptions.forEach(o => o.classList.remove('active'));
+      e.currentTarget.classList.add('active');
+      const val = e.currentTarget.getAttribute('data-val');
+      document.getElementById('category-display').innerText = val;
+      toggleCategoryDropdown();
+    };
+  });
+
+  // SCORUN dropdown options selection
+  const scorunOptions = document.querySelectorAll('.scorun-option');
+  scorunOptions.forEach(opt => {
+    opt.onclick = (e) => {
+      scorunOptions.forEach(o => o.classList.remove('active'));
+      e.currentTarget.classList.add('active');
+      const valText = e.currentTarget.innerText;
+      document.getElementById('scorun-display').innerText = valText;
+      toggleScorunDropdown();
+    };
+  });
+
+  // Platform dropdown options selection
+  const platformOptions = document.querySelectorAll('.platform-option');
+  const venueOtherInput = document.getElementById('ev-venue-other');
+  platformOptions.forEach(opt => {
+    opt.onclick = (e) => {
+      platformOptions.forEach(o => o.classList.remove('active'));
+      e.currentTarget.classList.add('active');
+      const valText = e.currentTarget.innerText;
+      const val = e.currentTarget.getAttribute('data-val');
+      document.getElementById('platform-display').innerText = valText;
+      
+      if (val === 'Other') {
+        venueOtherInput.style.display = 'block';
+        venueOtherInput.required = true;
+      } else {
+        venueOtherInput.style.display = 'none';
+        venueOtherInput.required = false;
+        venueOtherInput.value = '';
+      }
+      
+      togglePlatformDropdown();
+    };
+  });
   
   const evDesc = document.getElementById('ev-desc');
   const counter = document.getElementById('desc-counter');
@@ -971,57 +1446,77 @@ function initSubmitView() {
     });
   }
 
-  const form = document.getElementById('submit-event-form');
+  const form = document.getElementById('submit-form');
   if(form) {
     form.onsubmit = (e) => {
       e.preventDefault();
       
+      const locType = document.querySelector('input[name="loc_type"]:checked').value;
+      let venueVal = '';
+      let platformVal = null;
+
+      if (locType === 'physical') {
+        venueVal = document.getElementById('ev-venue-physical').value.trim();
+      } else {
+        const platformBtn = document.querySelector('.platform-option.active');
+        platformVal = platformBtn ? platformBtn.getAttribute('data-val') : 'Google Meet';
+        if (platformVal === 'Other') {
+          venueVal = document.getElementById('ev-venue-other').value.trim();
+        } else {
+          venueVal = platformVal;
+        }
+      }
+
+      const categoryBtn = document.querySelector('.category-option.active');
+      const categoryVal = categoryBtn ? categoryBtn.getAttribute('data-val') : 'Workshop';
+
+      const scorunBtn = document.querySelector('.scorun-option.active');
+      const scorunVal = scorunBtn ? parseInt(scorunBtn.getAttribute('data-val') || '0', 10) : 0;
+      
+      const isMulti = document.getElementById('dur_multi').checked;
+      let dateVal = '';
+      let startTimeVal = '';
+      let endTimeVal = '';
+      
+      if (!isMulti) {
+        dateVal = document.getElementById('ev-date').value;
+        startTimeVal = document.getElementById('ev-start').value;
+        endTimeVal = document.getElementById('ev-end').value;
+      } else {
+        const startD = document.getElementById('ev-start-date').value;
+        const endD = document.getElementById('ev-end-date').value;
+        dateVal = `${startD} to ${endD}`;
+        startTimeVal = document.getElementById('ev-start-time-multi').value;
+        endTimeVal = document.getElementById('ev-end-time-multi').value;
+      }
+
       const newEvent = {
         id: 'ev_' + Date.now(),
         title: document.getElementById('ev-title').value,
-        category: document.getElementById('ev-category').value,
+        category: categoryVal,
         description: document.getElementById('ev-desc').value,
-        event_date: document.getElementById('ev-date').value,
-        start_time: document.getElementById('ev-start').value,
-        end_time: document.getElementById('ev-end').value,
-        location_type: document.querySelector('input[name="loc_type"]:checked').value,
-        platform: document.getElementById('ev-platform') ? document.getElementById('ev-platform').value : null,
-        venue: document.getElementById('ev-venue').value,
+        event_date: dateVal,
+        start_time: startTimeVal,
+        end_time: endTimeVal,
+        location_type: locType,
+        platform: platformVal,
+        venue: venueVal,
         image_url: document.getElementById('ev-image').value,
         requested_by: currentUser.id,
         requested_by_name: currentUser.name,
         status: 'pending',
         registrations: 0,
-        scorun: parseInt(document.getElementById('ev-scorun').value) || 0
+        scorun: scorunVal
       };
 
       const events = JSON.parse(localStorage.getItem('uni_events') || '[]');
       events.push(newEvent);
       localStorage.setItem('uni_events', JSON.stringify(events));
 
-      document.getElementById('submit-form-container').style.display = 'none';
-      document.getElementById('submit-success-state').style.display = 'flex';
+      document.getElementById('submit-section').classList.add('hidden');
+      document.getElementById('success-section').classList.remove('hidden');
     };
   }
-
-  // Radio button logic
-  document.querySelectorAll('input[name="loc_type"]').forEach(radio => {
-    radio.addEventListener('change', (e) => {
-      const type = e.target.value;
-      const platformContainer = document.getElementById('platform-container');
-      if(platformContainer) platformContainer.style.display = type === 'online' ? 'block' : 'none';
-      
-      const venueLabel = document.getElementById('venue-label');
-      const venueInput = document.getElementById('ev-venue');
-      if (type === 'online') {
-        if(venueLabel) venueLabel.innerText = 'Meeting Link';
-        if(venueInput) venueInput.placeholder = 'https://meet.google.com/...';
-      } else {
-        if(venueLabel) venueLabel.innerText = 'Venue / Location';
-        if(venueInput) venueInput.placeholder = 'e.g. COIT DK1';
-      }
-    });
-  });
 }
 
 
@@ -1073,15 +1568,15 @@ function renderNav() {
     roleBadge = `<div class="badge i18n-grid" style="font-size: 0.65rem; padding: 0.2rem 0.4rem; font-weight: 700; border-radius: 4px; display: inline-grid; align-items: center; justify-content: center; line-height: normal;"><span data-i18n="role_student" style="margin-top: 1px;">STUDENT</span><span class="hidden-longest" style="margin-top: 1px;">PELAJAR</span></div>`;
   };
 
-  let links = `<a href="#discover" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:middle; margin-right:4px;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg><div class="i18n-grid"><span data-i18n="discover_title">Discover Events</span><span class="hidden-longest">Discover Events</span></div></a>`;
+  let links = `<a href="#discover" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg><div class="i18n-grid"><span data-i18n="discover_title">Discover Events</span><span class="hidden-longest">Discover Events</span></div></a>`;
   
   if (currentUser.role === 'committee') {
-    links += `<a href="#submit" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:middle; margin-right:4px;"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg><div class="i18n-grid"><span data-i18n="nav_submit">Submit Event</span><span class="hidden-longest">Hantar Acara</span></div></a>`;
-    links += `<a href="#my-events" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:middle; margin-right:4px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg><div class="i18n-grid"><span data-i18n="nav_my_events">My Events</span><span class="hidden-longest">Acara Saya</span></div></a>`;
+    links += `<a href="#submit" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg><div class="i18n-grid"><span data-i18n="nav_submit">Submit Event</span><span class="hidden-longest">Hantar Acara</span></div></a>`;
+    links += `<a href="#my-events" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg><div class="i18n-grid"><span data-i18n="nav_my_events">My Events</span><span class="hidden-longest">Acara Saya</span></div></a>`;
   }
   
   if (currentUser.role === 'admin') {
-    links += `<a href="#admin" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline-block; vertical-align:middle; margin-right:4px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="21"></line></svg><div class="i18n-grid"><span data-i18n="nav_admin">Admin Dashboard</span><span class="hidden-longest">Papan Pemuka Admin</span></div></a>`;
+    links += `<a href="#admin" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="21"></line></svg><div class="i18n-grid"><span data-i18n="nav_admin">Admin Dashboard</span><span class="hidden-longest">Papan Pemuka Admin</span></div></a>`;
   }
 
   container.innerHTML = `
@@ -1096,7 +1591,7 @@ function renderNav() {
         
         <div class="user-controls-wrapper" style="display: flex; align-items: center; gap: 0.25rem; margin-left: 0.25rem;">
           <!-- User Profile Component -->
-          <div class="user-profile-menu" role="button" tabindex="0" aria-label="Open User Profile" style="display: flex; align-items: center; padding: 0 0.75rem 0 0.25rem; height: 40px; box-sizing: border-box; border-radius: 9999px; cursor: pointer; transition: background-color 0.2s, box-shadow 0.2s;" onmouseover="this.style.backgroundColor='var(--hover-bg)'" onmouseout="this.style.backgroundColor='transparent'">
+          <div class="user-profile-menu" role="button" tabindex="0" aria-label="Open User Profile" style="display: flex; align-items: center; padding: 0 0.75rem 0 0.25rem; height: 40px; box-sizing: border-box; border-radius: 8px; cursor: pointer; transition: background-color 0.2s, box-shadow 0.2s;" onmouseover="this.style.backgroundColor='var(--hover-bg)'" onmouseout="this.style.backgroundColor='transparent'">
             <div class="avatar">${currentUser.name.charAt(0).toUpperCase()}</div>
             <div class="user-details" style="display:flex; flex-direction:column; margin-left:0.5rem; justify-content: center;">
               <span class="user-name" style="font-weight: 600; font-size: 0.85rem; color: var(--text-main); line-height: 1;">${currentUser.name}</span>
