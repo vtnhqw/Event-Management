@@ -123,6 +123,189 @@ async function loadSeedEvents() {
   }
 }
 
+// Initialize Supabase Client
+let supabaseClient = null;
+if (typeof CONFIG !== 'undefined' && CONFIG.SUPABASE_URL && CONFIG.SUPABASE_ANON_KEY && CONFIG.SUPABASE_URL !== 'YOUR_SUPABASE_PROJECT_URL') {
+  try {
+    if (window.supabase) {
+      supabaseClient = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+    } else {
+      console.warn("Supabase SDK is not loaded. Please check your internet connection or CDN link in index.html.");
+    }
+  } catch (e) {
+    console.error("Failed to initialize Supabase client:", e);
+  }
+}
+
+async function syncDatabase() {
+  if (!supabaseClient) return;
+  try {
+    const { data: remoteEvents, error: eventsError } = await supabaseClient
+      .from('events')
+      .select('*');
+    if (eventsError) throw eventsError;
+
+    if (!remoteEvents || remoteEvents.length === 0) {
+      const localEvents = getEvents();
+      if (localEvents.length > 0) {
+        const { error: insertError } = await supabaseClient
+          .from('events')
+          .insert(localEvents.map(ev => ({
+            id: ev.id,
+            title: ev.title,
+            category: ev.category,
+            description: ev.description,
+            event_date: ev.event_date,
+            start_time: ev.start_time,
+            end_time: ev.end_time,
+            venue: ev.venue,
+            image_url: ev.image_url,
+            requested_by: ev.requested_by || 'u_committee_1',
+            requested_by_name: ev.requested_by_name,
+            status: ev.status,
+            scorun: ev.scorun,
+            location_type: ev.location_type,
+            platform: ev.platform,
+            reject_reason: ev.reject_reason,
+            registrations: ev.registrations
+          })));
+        if (insertError) console.error("Failed to seed events to Supabase:", insertError);
+      }
+    } else {
+      localStorage.setItem('uni_events', JSON.stringify(remoteEvents.map(normalizeEvent)));
+    }
+
+    const { data: remoteRSVPs, error: rsvpsError } = await supabaseClient
+      .from('rsvps')
+      .select('*');
+    if (rsvpsError) throw rsvpsError;
+
+    if (remoteRSVPs) {
+      localStorage.setItem('uni_rsvps', JSON.stringify(remoteRSVPs));
+    }
+  } catch (e) {
+    console.error("Failed to sync database with Supabase:", e);
+  }
+}
+
+async function dbInsertEvent(event) {
+  if (supabaseClient) {
+    try {
+      const { error } = await supabaseClient
+        .from('events')
+        .insert([{
+          id: event.id,
+          title: event.title,
+          category: event.category,
+          description: event.description,
+          event_date: event.event_date,
+          start_time: event.start_time,
+          end_time: event.end_time,
+          venue: event.venue,
+          image_url: event.image_url,
+          requested_by: event.requested_by || 'u_committee_1',
+          requested_by_name: event.requested_by_name,
+          status: event.status,
+          scorun: event.scorun,
+          location_type: event.location_type,
+          platform: event.platform,
+          reject_reason: event.reject_reason,
+          registrations: event.registrations
+        }]);
+      if (error) throw error;
+    } catch (e) {
+      console.error("Failed to insert event in Supabase:", e);
+    }
+  }
+}
+
+async function dbUpdateEventStatus(id, status, reason = null) {
+  if (supabaseClient) {
+    try {
+      const { error } = await supabaseClient
+        .from('events')
+        .update({ status: status, reject_reason: reason })
+        .eq('id', id);
+      if (error) throw error;
+    } catch (e) {
+      console.error("Failed to update status in Supabase:", e);
+    }
+  }
+}
+
+async function dbInsertRSVP(eventId, userId, email) {
+  if (supabaseClient) {
+    try {
+      const { error } = await supabaseClient
+        .from('rsvps')
+        .insert([{
+          event_id: eventId,
+          user_id: userId,
+          email: email
+        }]);
+      if (error) throw error;
+    } catch (e) {
+      console.error("Failed to insert RSVP in Supabase:", e);
+    }
+  }
+}
+
+async function dbDeleteRSVP(eventId, userId) {
+  if (supabaseClient) {
+    try {
+      const { error } = await supabaseClient
+        .from('rsvps')
+        .delete()
+        .eq('event_id', eventId)
+        .eq('user_id', userId);
+      if (error) throw error;
+    } catch (e) {
+      console.error("Failed to delete RSVP from Supabase:", e);
+    }
+  }
+}
+
+async function sendConfirmationEmail(toEmail, event) {
+  if (!toEmail || typeof CONFIG === 'undefined' || !CONFIG.EMAILJS_SERVICE_ID || !CONFIG.EMAILJS_TEMPLATE_ID || !CONFIG.EMAILJS_PUBLIC_KEY || CONFIG.EMAILJS_SERVICE_ID === 'YOUR_EMAILJS_SERVICE_ID') {
+    console.warn("EmailJS credentials not configured. Skipping confirmation email.");
+    return;
+  }
+
+  const templateParams = {
+    to_email: toEmail,
+    user_name: currentUser.name,
+    event_title: event.title,
+    event_date: formatEventDateRange(event.event_date),
+    event_time: formatEventTimeRange(event.start_time, event.end_time),
+    event_venue: event.venue,
+    event_scorun: event.scorun
+  };
+
+  try {
+    const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        service_id: CONFIG.EMAILJS_SERVICE_ID,
+        template_id: CONFIG.EMAILJS_TEMPLATE_ID,
+        user_id: CONFIG.EMAILJS_PUBLIC_KEY,
+        template_params: templateParams
+      })
+    });
+
+    if (response.ok) {
+      console.log("Confirmation email sent successfully via EmailJS!");
+    } else {
+      const errText = await response.text();
+      console.error("EmailJS sending failed:", errText);
+    }
+  } catch (e) {
+    console.error("Error sending confirmation email:", e);
+  }
+}
+
 const SEED_USERS = [
   { id: 'u_student_1', studentId: 'SW01083101', email: null, password: 'student123', name: 'Ahmad Arif', role: 'student' },
   { id: 'u_committee_1', studentId: 'SW01083102', email: null, password: 'committee123', name: 'Siti Rahman', role: 'committee' },
@@ -557,6 +740,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.location.hash = '#discover';
   } else {
     router();
+  }
+
+  // Sync with Supabase, then refresh current route
+  if (supabaseClient) {
+    syncDatabase().then(() => {
+      router();
+    });
   }
 });
 
@@ -1072,6 +1262,7 @@ function handleDecision(id, status, reason = null) {
       events[idx].status = status;
       events[idx].reject_reason = reason;
       saveEvents(events);
+      dbUpdateEventStatus(id, status, reason);
       if (status === 'approved') {
         showToast('Event approved successfully', 'success');
       } else {
@@ -1183,13 +1374,23 @@ function renderEvent(eventId) {
     const adminCantRegisterSubtext = currentLang === 'en'
       ? 'Registration is restricted to students and committee members.'
       : 'Pendaftaran terhad kepada pelajar dan ahli jawatankuasa sahaja.';
+    const deleteBtnText = currentLang === 'en' ? 'Delete Event' : 'Padam Acara';
       
     rsvpBtnHtml = `
       <button id="rsvp-btn" class="btn btn-outline" style="width: 100%; justify-content: center; padding: 0.875rem; cursor: not-allowed; opacity: 0.6;" disabled>
         ${adminCantRegisterText}
       </button>
     `;
-    rsvpSubtextHtml = `<p style="text-align: center; font-size: 0.8rem; color: var(--amber); margin: 0; line-height: 1.4;">${adminCantRegisterSubtext}</p>`;
+    rsvpSubtextHtml = `
+      <p style="text-align: center; font-size: 0.8rem; color: var(--text-muted); margin: 0 0 1rem 0; line-height: 1.4;">${adminCantRegisterSubtext}</p>
+      <button onclick="deleteEvent('${eventId}')" class="btn" style="width: 100%; justify-content: center; padding: 0.875rem; background: #EF4444; color: white; border: none; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 0.5rem; border-radius: 0.5rem;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+        </svg>
+        ${deleteBtnText}
+      </button>
+    `;
   } else {
     rsvpBtnHtml = `
       <button id="rsvp-btn" onclick="toggleRSVP('${eventId}')" class="btn ${isRSVPd ? 'btn-outline' : 'btn-primary'}" style="width: 100%; justify-content: center; padding: 0.875rem;">
@@ -1421,7 +1622,7 @@ function openRegistrationEmailModal(eventId, onConfirm) {
 function toggleRSVP(eventId) {
   if (!currentUser || currentUser.role === 'admin') return;
   
-  const proceedRSVP = () => {
+  const proceedRSVP = (email = null) => {
     const btn = document.getElementById('rsvp-btn');
     if (btn) {
       btn.style.opacity = '0.7';
@@ -1439,12 +1640,17 @@ function toggleRSVP(eventId) {
           events[evIdx].registrations = Math.max(0, (events[evIdx].registrations || 0) - 1);
         }
         showToast('Registration cancelled', 'info');
+        dbDeleteRSVP(eventId, currentUser.id);
       } else {
         rsvps.push({ event_id: eventId, user_id: currentUser.id, timestamp: new Date().toISOString() });
         if (evIdx !== -1) {
           events[evIdx].registrations = (events[evIdx].registrations || 0) + 1;
         }
         showToast('Successfully registered for event!');
+        dbInsertRSVP(eventId, currentUser.id, email || '');
+        if (evIdx !== -1 && email) {
+          sendConfirmationEmail(email, events[evIdx]);
+        }
       }
       
       localStorage.setItem('uni_rsvps', JSON.stringify(rsvps));
@@ -1457,10 +1663,54 @@ function toggleRSVP(eventId) {
     proceedRSVP();
   } else {
     openRegistrationEmailModal(eventId, (email) => {
-      proceedRSVP();
+      proceedRSVP(email);
     });
   }
 }
+
+window.deleteEvent = async function(eventId) {
+  const confirmMsg = currentLang === 'en'
+    ? 'Are you sure you want to delete this event? This action cannot be undone.'
+    : 'Adakah anda pasti mahu memadamkan acara ini? Tindakan ini tidak boleh diundurkan.';
+    
+  if (!confirm(confirmMsg)) return;
+  
+  // Update local storage
+  let events = getEvents();
+  events = events.filter(e => e.id !== eventId);
+  saveEvents(events);
+  
+  // Clear associated local RSVPs
+  let rsvps = JSON.parse(localStorage.getItem('uni_rsvps') || '[]');
+  rsvps = rsvps.filter(r => r.event_id !== eventId);
+  localStorage.setItem('uni_rsvps', JSON.stringify(rsvps));
+  
+  // Delete from Supabase
+  if (supabaseClient) {
+    const { error } = await supabaseClient
+      .from('events')
+      .delete()
+      .eq('id', eventId);
+    if (error) {
+      console.error("Failed to delete event from Supabase:", error);
+      showToast('Error deleting event from database', 'error');
+    } else {
+      showToast(currentLang === 'en' ? 'Event deleted successfully' : 'Acara berjaya dipadamkan', 'success');
+    }
+  } else {
+    showToast(currentLang === 'en' ? 'Event deleted locally' : 'Acara dipadamkan secara tempatan', 'success');
+  }
+  
+  // Refresh current view
+  const hash = window.location.hash.split('?')[0];
+  if (hash === '#my-events') {
+    loadMyEvents();
+  } else if (hash === '#admin') {
+    loadAdminData();
+  } else {
+    window.location.hash = '#discover';
+  }
+};
 
 // --- MY EVENTS VIEW ---
 function initMyEventsView() {
@@ -1522,12 +1772,23 @@ function loadMyEvents() {
           </div>
         </div>
         
-        ${ev.status === 'rejected' && ev.reject_reason ? `
-          <div style="margin-top: auto; padding: 0.75rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 0.5rem; font-size: 0.8rem; color: #EF4444;">
-            <strong style="display: block; margin-bottom: 0.25rem;">Admin Feedback:</strong>
-            ${escapeHTML(ev.reject_reason)}
-          </div>
-        ` : `<div style="margin-top: auto;"></div>`}
+        <div style="margin-top: auto; display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; width: 100%;">
+          ${ev.status === 'rejected' && ev.reject_reason ? `
+            <div style="flex: 1; padding: 0.75rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 0.5rem; font-size: 0.8rem; color: #EF4444;">
+              <strong style="display: block; margin-bottom: 0.25rem;">Admin Feedback:</strong>
+              ${escapeHTML(ev.reject_reason)}
+            </div>
+          ` : `<div></div>`}
+          
+          <button onclick="deleteEvent('${ev.id}')" style="background: transparent; border: none; color: #EF4444; cursor: pointer; padding: 0.5rem; display: flex; align-items: center; justify-content: center; border-radius: 0.375rem; transition: background-color 0.2s; flex-shrink: 0;" onmouseover="this.style.backgroundColor='rgba(239, 68, 68, 0.1)'" onmouseout="this.style.backgroundColor='transparent'" title="${currentLang === 'en' ? 'Delete Event' : 'Padam Acara'}">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+          </button>
+        </div>
       </div>
     `;
   }).join('');
@@ -2094,6 +2355,7 @@ function initSubmitView() {
       const events = getEvents();
       events.push(newEvent);
       saveEvents(events);
+      dbInsertEvent(newEvent);
 
       document.getElementById('submit-section').classList.add('hidden');
       document.getElementById('success-section').classList.remove('hidden');
