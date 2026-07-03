@@ -1132,50 +1132,55 @@ function renderEvent(eventId) {
       </a>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr; gap: 2rem; align-items: start; max-width: 1000px; margin: 0 auto;">
-      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-          <div style="aspect-ratio: 16/9; background: var(--hover-bg); border-radius: 1rem; overflow: hidden; position: relative;">
-            ${ev.image_url 
+    <div class="event-detail-grid">
+      <!-- Left/Main Column -->
+      <div class="event-main-col">
+        <div class="event-hero-wrapper animate-in" style="aspect-ratio: 16/9; background: var(--hover-bg); border-radius: 1rem; overflow: hidden; position: relative; opacity: 0; animation-delay: 0.05s;">
+          ${ev.image_url 
             ? `<img src="${imageUrl}" alt="${title}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null; this.outerHTML='<div style=\\'width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--border-color);\\'><svg width=\\'64\\' height=\\'64\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'1.5\\'><rect x=\\'3\\' y=\\'3\\' width=\\'18\\' height=\\'18\\' rx=\\'2\\' ry=\\'2\\'></rect><circle cx=\\'8.5\\' cy=\\'8.5\\' r=\\'1.5\\'></circle><polyline points=\\'21 15 16 10 5 21\\'></polyline></svg></div>';">`
             : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--border-color);"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></div>`}
         </div>
  
-        <div>
-          <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
-            <span class="badge ${categoryBadgeClass(ev.category)}">${category}</span>
-            ${ev.scorun > 0 ? `<span class="badge" style="background: var(--accent-glow); color: var(--accent); font-weight: 700;">${ev.scorun} SCORUN</span>` : ''}
-          </div>
-          <h1 style="font-size: 2rem; font-weight: 800; color: var(--text-main); margin-bottom: 1.5rem; line-height: 1.2;">${title}</h1>
-          
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; padding: 1.5rem; background: var(--card-bg); border-radius: 1rem; border: 1px solid var(--border-color);">
-            <div style="display: flex; gap: 1rem;">
-              <div style="width: 40px; height: 40px; border-radius: 0.5rem; background: var(--hover-bg); display: flex; align-items: center; justify-content: center; color: var(--amber);">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-              </div>
-              <div>
-                <div style="font-weight: 600; color: var(--text-main); margin-bottom: 0.15rem;">${dateStr}</div>
-                <div style="font-size: 0.85rem; color: var(--text-muted);">${timeStr}</div>
-              </div>
-            </div>
-            
-            <div style="display: flex; gap: 1rem;">
-              <div style="width: 40px; height: 40px; border-radius: 0.5rem; background: var(--hover-bg); display: flex; align-items: center; justify-content: center; color: var(--amber);">
-                ${locIcon}
-              </div>
-              <div>
-                <div style="font-weight: 600; color: var(--text-main); margin-bottom: 0.15rem;">${ev.location_type === 'online' ? platform : 'Location'}</div>
-                <div style="font-size: 0.85rem; color: var(--text-muted);">${venue}</div>
-              </div>
-            </div>
-          </div>
- 
-          <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-main);" data-i18n="about_event">About this event</h3>
-          <p style="color: var(--text-muted); line-height: 1.7; font-size: 1rem;">${description}</p>
+        <div class="event-tags-row animate-in" style="display: flex; gap: 0.5rem; flex-wrap: wrap; opacity: 0; animation-delay: 0.12s;">
+          <span class="badge ${categoryBadgeClass(ev.category)}">${category}</span>
+          ${ev.scorun > 0 ? `<span class="badge" style="background: var(--accent-glow); color: var(--accent); font-weight: 700;">${ev.scorun} SCORUN</span>` : ''}
+        </div>
+        
+        <h1 class="event-title-header animate-in" style="font-size: 2rem; font-weight: 800; color: var(--text-main); line-height: 1.2; margin: 0; opacity: 0; animation-delay: 0.18s;">${title}</h1>
+        
+        <div class="event-about-section animate-in" style="opacity: 0; animation-delay: 0.25s;">
+          <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-main); margin-top: 0;" data-i18n="about_event">About this event</h3>
+          <p style="color: var(--text-muted); line-height: 1.7; font-size: 1rem; margin: 0;">${description}</p>
         </div>
       </div>
  
-      <div style="position: sticky; top: 2rem;">
-        <div class="card" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem;">
+      <!-- Right/Sidebar Column -->
+      <div class="event-sidebar-col">
+        <!-- Date/Time & Location Card -->
+        <div class="event-info-card card animate-in" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; opacity: 0; animation-delay: 0.15s;">
+          <div style="display: flex; gap: 1rem;">
+            <div style="width: 40px; height: 40px; border-radius: 0.5rem; background: var(--hover-bg); display: flex; align-items: center; justify-content: center; color: var(--amber); flex-shrink: 0;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            </div>
+            <div>
+              <div style="font-weight: 600; color: var(--text-main); margin-bottom: 0.15rem;">${dateStr}</div>
+              <div style="font-size: 0.85rem; color: var(--text-muted);">${timeStr}</div>
+            </div>
+          </div>
+          
+          <div style="display: flex; gap: 1rem;">
+            <div style="width: 40px; height: 40px; border-radius: 0.5rem; background: var(--hover-bg); display: flex; align-items: center; justify-content: center; color: var(--amber); flex-shrink: 0;">
+              ${locIcon}
+            </div>
+            <div>
+              <div style="font-weight: 600; color: var(--text-main); margin-bottom: 0.15rem;">${ev.location_type === 'online' ? platform : 'Location'}</div>
+              <div style="font-size: 0.85rem; color: var(--text-muted);">${venue}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Registration Card -->
+        <div class="event-register-card card animate-in" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1.25rem; opacity: 0; animation-delay: 0.22s;">
           <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin: 0;">Registration</h3>
           
           <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
@@ -1917,12 +1922,16 @@ function renderNav() {
   }
   
   let roleBadge = '';
+  let avatarBg = 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)'; // default (student)
+
   if (currentUser.role === 'committee') {
-    roleBadge = `<div class="badge i18n-grid" style="font-size: 0.65rem; padding: 0.2rem 0.4rem; background: var(--amber); color: #fff; font-weight: 700; border-radius: 4px; display: inline-grid; align-items: center; justify-content: center; line-height: normal;"><span data-i18n="role_committee" style="margin-top: 1px;">COMMITTEE</span><span class="hidden-longest" style="margin-top: 1px;">JAWATANKUASA</span></div>`;
+    roleBadge = `<div class="badge i18n-grid" style="font-size: 0.6rem; padding: 0.1rem 0.3rem; margin-top: 3px; background: rgba(217, 164, 65, 0.15); color: #D9A441; font-weight: 700; border-radius: 4px; display: inline-grid; align-items: center; justify-content: center; line-height: normal;"><span data-i18n="role_committee">COMMITTEE</span><span class="hidden-longest">JAWATANKUASA</span></div>`;
+    avatarBg = 'linear-gradient(135deg, #F59E0B 0%, #D9A441 100%)';
   } else if (currentUser.role === 'admin') {
-    roleBadge = `<div class="badge i18n-grid" style="font-size: 0.65rem; padding: 0.2rem 0.4rem; background: #EF4444; color: #fff; font-weight: 700; border-radius: 4px; display: inline-grid; align-items: center; justify-content: center; line-height: normal;"><span data-i18n="role_admin" style="margin-top: 1px;">ADMIN</span><span class="hidden-longest" style="margin-top: 1px;">ADMIN</span></div>`;
+    roleBadge = `<div class="badge i18n-grid" style="font-size: 0.6rem; padding: 0.1rem 0.3rem; margin-top: 3px; background: rgba(239, 68, 68, 0.15); color: #EF4444; font-weight: 700; border-radius: 4px; display: inline-grid; align-items: center; justify-content: center; line-height: normal;"><span data-i18n="role_admin">ADMIN</span><span class="hidden-longest">ADMIN</span></div>`;
+    avatarBg = 'linear-gradient(135deg, #F87171 0%, #EF4444 100%)';
   } else {
-    roleBadge = `<div class="badge i18n-grid" style="font-size: 0.65rem; padding: 0.2rem 0.4rem; font-weight: 700; border-radius: 4px; display: inline-grid; align-items: center; justify-content: center; line-height: normal;"><span data-i18n="role_student" style="margin-top: 1px;">STUDENT</span><span class="hidden-longest" style="margin-top: 1px;">PELAJAR</span></div>`;
+    roleBadge = `<div class="badge i18n-grid" style="font-size: 0.6rem; padding: 0.1rem 0.3rem; margin-top: 3px; background: rgba(59, 130, 246, 0.15); color: #3B82F6; font-weight: 700; border-radius: 4px; display: inline-grid; align-items: center; justify-content: center; line-height: normal;"><span data-i18n="role_student">STUDENT</span><span class="hidden-longest">PELAJAR</span></div>`;
   };
 
   let links = `<a href="#discover" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg><div class="i18n-grid"><span data-i18n="discover_title">Discover Events</span><span class="hidden-longest">Discover Events</span></div></a>`;
@@ -1949,7 +1958,7 @@ function renderNav() {
         <div class="user-controls-wrapper" style="display: flex; align-items: center; gap: 0.25rem; margin-left: 0.25rem;">
           <!-- User Profile Component -->
           <div class="user-profile-menu" role="button" tabindex="0" aria-label="Open User Profile" style="display: flex; align-items: center; padding: 0 0.75rem 0 0.25rem; height: 40px; box-sizing: border-box; border-radius: 8px; cursor: pointer; transition: background-color 0.2s, box-shadow 0.2s;" onmouseover="this.style.backgroundColor='var(--hover-bg)'" onmouseout="this.style.backgroundColor='transparent'">
-            <div class="avatar">${currentUser.name.charAt(0).toUpperCase()}</div>
+            <div class="avatar" style="background: ${avatarBg};">${currentUser.name.charAt(0).toUpperCase()}</div>
             <div class="user-details" style="display:flex; flex-direction:column; margin-left:0.5rem; justify-content: center;">
               <span class="user-name" style="font-weight: 600; font-size: 0.85rem; color: var(--text-main); line-height: 1;">${currentUser.name}</span>
               ${roleBadge}

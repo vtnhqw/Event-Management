@@ -418,8 +418,8 @@ h1, h2, h3, h4 {
   border-color: var(--border-color);
 }
 .avatar {
-  width: 2.25rem;
-  height: 2.25rem;
+  width: 2rem;
+  height: 2rem;
   border-radius: 8px;
   background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
   color: #ffffff;
@@ -427,7 +427,7 @@ h1, h2, h3, h4 {
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
 }
 .user-details {
   display: flex;
@@ -515,13 +515,15 @@ h1, h2, h3, h4 {
 .badge-rejected { background-color: rgba(239, 68, 68, 0.15); color: #EF4444; }
 
 /* Category Badges */
-.badge-cat-workshop { background-color: rgba(59, 130, 246, 0.15); color: #3B82F6; }
-.badge-cat-competition { background-color: rgba(244, 63, 94, 0.15); color: #F43F5E; }
-.badge-cat-talk { background-color: rgba(139, 92, 246, 0.15); color: #8B5CF6; }
-.badge-cat-social { background-color: rgba(236, 72, 153, 0.15); color: #EC4899; }
-.badge-cat-sports { background-color: rgba(34, 197, 94, 0.15); color: #22C55E; }
+.badge-cat-workshop { background-color: rgba(255, 149, 0, 0.15); color: #ff9500; }
+.badge-cat-competition { background-color: rgba(255, 204, 0, 0.15); color: #e6b000; }
+.dark-mode .badge-cat-competition { color: #ffcc00; }
+.badge-cat-talk { background-color: rgba(255, 45, 85, 0.15); color: #ff2d55; }
+.badge-cat-social { background-color: rgba(90, 200, 250, 0.15); color: #1faade; }
+.dark-mode .badge-cat-social { color: #5ac8fa; }
+.badge-cat-sports { background-color: rgba(52, 199, 89, 0.15); color: #34c759; }
 .badge-cat-hiring { background-color: rgba(0, 122, 255, 0.15); color: #007aff; }
-.badge-cat-other { background-color: var(--hover-bg); color: var(--text-muted); }
+.badge-cat-other { background-color: rgba(175, 82, 222, 0.15); color: #af52de; }
 
 /* Grid */
 .grid {
@@ -1551,6 +1553,17 @@ h1, h2, h3, h4 {
   color: var(--text-main);
 }
 
+.category-card[data-category="All"] .category-name { color: #8e8e93; }
+.category-card[data-category="Workshop"] .category-name { color: #ff9500; }
+.category-card[data-category="Competition"] .category-name { color: #e6b000; }
+.dark-mode .category-card[data-category="Competition"] .category-name { color: #ffcc00; }
+.category-card[data-category="Talk"] .category-name { color: #ff2d55; }
+.category-card[data-category="Social"] .category-name { color: #1faade; }
+.dark-mode .category-card[data-category="Social"] .category-name { color: #5ac8fa; }
+.category-card[data-category="Sports"] .category-name { color: #34c759; }
+.category-card[data-category="Hiring"] .category-name { color: #007aff; }
+.category-card[data-category="Other"] .category-name { color: #af52de; }
+
 .category-count {
   font-size: 0.8rem;
   color: var(--text-muted);
@@ -2413,3 +2426,71 @@ body.auth-page #view-login {
     transform: translateY(0);
   }
 }
+
+/* Event Detail Page Grid Layout */
+.event-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: start;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.event-main-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.event-sidebar-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .event-detail-grid {
+    grid-template-columns: 3fr 2fr; /* ~60% main column, ~40% sidebar column */
+    column-gap: 2rem; /* 32px gap */
+    row-gap: 1.5rem;
+  }
+
+  .event-sidebar-col {
+    position: sticky;
+    top: 24px;
+  }
+}
+
+@media (max-width: 767px) {
+  .event-detail-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  .event-main-col,
+  .event-sidebar-col {
+    display: contents;
+  }
+  
+  /* ordering on mobile */
+  .event-hero-wrapper {
+    order: 1;
+  }
+  .event-tags-row {
+    order: 2;
+  }
+  .event-title-header {
+    order: 3;
+  }
+  .event-info-card {
+    order: 4;
+  }
+  .event-register-card {
+    order: 5;
+  }
+  .event-about-section {
+    order: 6;
+  }
+}
+
