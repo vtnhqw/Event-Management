@@ -106,7 +106,11 @@ const TRANSLATIONS = {
     lbl_title: "Event Title", lbl_category: "Category", lbl_desc: "Description", lbl_date: "Date", lbl_venue: "Venue", lbl_start: "Start Time", lbl_end: "End Time", lbl_image: "Image URL (Optional)", btn_submit_approval: "Submit for Approval",
     lbl_location_type: "Location Type", loc_physical: "Physical", loc_online: "Online", lbl_platform: "Online Platform", platform_other: "Other",
     filter_month_all: "All Months", month_01: "January", month_02: "February", month_03: "March", month_04: "April", month_05: "May", month_06: "June", month_07: "July", month_08: "August", month_09: "September", month_10: "October", month_11: "November", month_12: "December",
-    lbl_date_start: "Date & Start", add_location: "Add Event Location", ph_offline: "e.g. Offline location", ph_virtual: "Platform", add_desc: "Add Description", ph_desc: "Offline location or virtual link", event_options: "Event Options", require_approval: "Require Approval", scorun_points: "SCORUN Points", btn_create_event: "Create Event", submit_success_title: "Submitted successfully", submit_success_sub: "Your event is now awaiting admin approval.", ph_event_name: "Event Name", card_going: "going", card_view: "View &rarr;", image_url_notice: "We only accept online image URLs. Direct image file uploads are not supported.", btn_back: "Back to Events", btn_cancel_register: "Cancel Registration", admin_bypass: "Admins bypass approval", btn_processing: "Processing..."
+    lbl_date_start: "Date & Start", add_location: "Add Event Location", ph_offline: "e.g. Offline location", ph_virtual: "Platform", add_desc: "Add Description", ph_desc: "Offline location or virtual link", event_options: "Event Options", require_approval: "Require Approval", scorun_points: "SCORUN Points", btn_create_event: "Create Event", submit_success_title: "Submitted successfully", submit_success_sub: "Your event is now awaiting admin approval.", ph_event_name: "Event Name", card_going: "going", card_view: "View &rarr;", image_url_notice: "We only accept online image URLs. Direct image file uploads are not supported.", btn_back: "Back to Events", btn_cancel_register: "Cancel Registration", admin_bypass: "Admins bypass approval", btn_processing: "Processing...",
+    ai_chat_welcome: "Hi there! 👋 I'm your UNIEvent AI Assistant. Ask me anything about events, SCORUN points, registration, or how to submit your own event!",
+    ai_chat_suggest_1: "How to register?",
+    ai_chat_suggest_2: "What is SCORUN?",
+    ai_chat_placeholder: "Type a message..."
   },
   my: {
     nav_submit: "Hantar Acara", nav_my_events: "Acara Saya", nav_admin: "Papan Pemuka Admin", nav_logout: "Log Keluar",
@@ -129,7 +133,11 @@ const TRANSLATIONS = {
     lbl_title: "Tajuk Acara", lbl_category: "Kategori", lbl_desc: "Penerangan", lbl_date: "Tarikh", lbl_venue: "Tempat", lbl_start: "Masa Mula", lbl_end: "Masa Tamat", lbl_image: "URL Imej (Pilihan)", btn_submit_approval: "Hantar untuk Kelulusan",
     lbl_location_type: "Jenis Lokasi", loc_physical: "Fizikal", loc_online: "Dalam Talian", lbl_platform: "Platform Dalam Talian", platform_other: "Lain-lain",
     filter_month_all: "Semua Bulan", month_01: "Januari", month_02: "Februari", month_03: "Mac", month_04: "April", month_05: "Mei", month_06: "Jun", month_07: "Julai", month_08: "Ogos", month_09: "September", month_10: "Oktober", month_11: "November", month_12: "Disember",
-    lbl_date_start: "Tarikh & Mula", add_location: "Tambah Lokasi Acara", ph_offline: "cth. Lokasi fizikal", ph_virtual: "Platform", add_desc: "Tambah Penerangan", ph_desc: "Lokasi fizikal atau pautan maya", event_options: "Pilihan Acara", require_approval: "Perlukan Kelulusan", scorun_points: "Mata SCORUN", btn_create_event: "Cipta Acara", submit_success_title: "Dihantar dengan berjaya", submit_success_sub: "Acara anda kini menunggu kelulusan admin.", ph_event_name: "Nama Acara", card_going: "hadir", card_view: "Lihat &rarr;", image_url_notice: "Kami hanya menerima URL gambar dalam talian. Muat naik fail gambar secara langsung tidak disokong.", btn_back: "Kembali ke Acara", btn_cancel_register: "Batal Pendaftaran", admin_bypass: "Admin mengecualikan kelulusan", btn_processing: "Memproses..."
+    lbl_date_start: "Tarikh & Mula", add_location: "Tambah Lokasi Acara", ph_offline: "cth. Lokasi fizikal", ph_virtual: "Platform", add_desc: "Tambah Penerangan", ph_desc: "Lokasi fizikal atau pautan maya", event_options: "Pilihan Acara", require_approval: "Perlukan Kelulusan", scorun_points: "Mata SCORUN", btn_create_event: "Cipta Acara", submit_success_title: "Dihantar dengan berjaya", submit_success_sub: "Acara anda kini menunggu kelulusan admin.", ph_event_name: "Nama Acara", card_going: "hadir", card_view: "Lihat &rarr;", image_url_notice: "Kami hanya menerima URL gambar dalam talian. Muat naik fail gambar secara langsung tidak disokong.", btn_back: "Kembali ke Acara", btn_cancel_register: "Batal Pendaftaran", admin_bypass: "Admin mengecualikan kelulusan", btn_processing: "Memproses...",
+    ai_chat_welcome: "Hai di sana! 👋 Saya Pembantu AI UNIEvent anda. Tanya saya apa-apa tentang acara, mata SCORUN, pendaftaran, atau cara menghantar acara anda sendiri!",
+    ai_chat_suggest_1: "Bagaimana cara mendaftar?",
+    ai_chat_suggest_2: "Apakah itu SCORUN?",
+    ai_chat_placeholder: "Tulis mesej..."
   }
 };
 
@@ -1987,12 +1995,8 @@ function updateAIChatVisibility() {
   const widget = document.getElementById('ai-chat-widget');
   if (!widget) return;
   
-  if (!currentUser || currentUser.role === 'student') {
-    widget.style.display = 'block';
-  } else {
-    widget.style.display = 'none';
-    widget.classList.remove('chat-open');
-  }
+  // Available to all users/roles: Guest, Student, Committee, Admin
+  widget.style.display = 'block';
 }
 
 // --- AI CHAT ASSISTANT ---
@@ -2075,23 +2079,82 @@ window.sendAIChatMessage = function() {
     const typingIndicatorEl = document.getElementById(typingId);
     if (typingIndicatorEl) typingIndicatorEl.remove();
     
-    let aiResponse = "I'm here to help! I can answer questions about event registration, SCORUN points, or how to submit your own event. Try asking: 'how to register' or 'what is scorun?'";
     const lowerText = text.toLowerCase();
     
-    if (lowerText.includes('register') || lowerText.includes('daftar') || lowerText.includes('rsvp')) {
-      aiResponse = "To register for an event, click on any event card on the Discover page, then click the amber **'Register Now'** button in the sidebar. Please make sure you are logged in first!";
-    } else if (lowerText.includes('scorun') || lowerText.includes('point') || lowerText.includes('mata')) {
-      aiResponse = "SCORUN points are student activity credits at UNITEN. Events showing an amber SCORUN tag will automatically grant you those points once you are approved/attend the event!";
-    } else if (lowerText.includes('submit') || lowerText.includes('create') || lowerText.includes('hantar') || lowerText.includes('buat')) {
-      aiResponse = "If you are a Committee member, you can submit events for approval by clicking **'Submit Event'** in the navbar. Fill in the event details and click submit. Admins will review it shortly!";
-    } else if (lowerText.includes('admin') || lowerText.includes('approve') || lowerText.includes('lulus')) {
-      aiResponse = "Admins can manage and approve pending event submissions in the **'Admin Dashboard'** tab in the navbar. They can approve or reject with feedback.";
-    } else if (lowerText.includes('category') || lowerText.includes('kategori') || lowerText.includes('type')) {
-      aiResponse = "We have several event categories: **Workshops, Competitions, Talks, Social gatherings, Sports, Hiring drives, and Others**. You can browse them using the filter grid on the Discover page!";
-    } else if (lowerText.includes('hello') || lowerText.includes('hi') || lowerText.includes('hey') || lowerText.includes('assalamualaikum')) {
-      aiResponse = "Hello! 👋 How can I assist you with UNIEvent today?";
-    } else if (lowerText.includes('thank') || lowerText.includes('tq') || lowerText.includes('terima kasih')) {
-      aiResponse = "You're very welcome! Let me know if you need anything else. 😊";
+    const hasMalayKeywords = lowerText.includes('daftar') || 
+                             lowerText.includes('mata') || 
+                             lowerText.includes('hantar') || 
+                             lowerText.includes('buat') || 
+                             lowerText.includes('lulus') || 
+                             lowerText.includes('kategori') || 
+                             lowerText.includes('terima kasih') || 
+                             lowerText.includes('assalamualaikum') ||
+                             lowerText.includes('nak') ||
+                             lowerText.includes('na') ||
+                             lowerText.includes('macam') ||
+                             lowerText.includes('mana') ||
+                             lowerText.includes('acara') ||
+                             lowerText.includes('program') ||
+                             lowerText.includes('sukan') ||
+                             lowerText.includes('bengkel') ||
+                             lowerText.includes('ceramah') ||
+                             lowerText.includes('pertandingan');
+                             
+    const hasEnglishKeywords = lowerText.includes('register') || 
+                               lowerText.includes('rsvp') ||
+                               lowerText.includes('point') || 
+                               lowerText.includes('submit') || 
+                               lowerText.includes('create') || 
+                               lowerText.includes('approve') || 
+                               lowerText.includes('category') || 
+                               lowerText.includes('thank') || 
+                               lowerText.includes('tq');
+                               
+    let isMalay = currentLang === 'my';
+    if (hasMalayKeywords) {
+      isMalay = true;
+    } else if (hasEnglishKeywords) {
+      isMalay = false;
+    }
+    
+    let aiResponse = "";
+    
+    if (isMalay) {
+      aiResponse = "Saya sedia membantu! Saya boleh menjawab soalan mengenai pendaftaran acara, mata SCORUN, atau cara menghantar acara anda sendiri. Cuba tanya: 'cara mendaftar' atau 'apa itu scorun?'";
+      
+      if (lowerText.includes('register') || lowerText.includes('daftar') || lowerText.includes('rsvp')) {
+        aiResponse = "Untuk mendaftar acara, klik pada mana-mana kad acara di halaman **Teroka**, kemudian klik butang jingga **'Daftar Sekarang'** di bar sisi. Pastikan anda telah log masuk terlebih dahulu!";
+      } else if (lowerText.includes('scorun') || lowerText.includes('point') || lowerText.includes('mata')) {
+        aiResponse = "Mata **SCORUN** ialah kredit aktiviti pelajar di UNITEN. Acara yang memaparkan tag jingga SCORUN akan memberikan anda mata tersebut secara automatik selepas anda menghadiri/diluluskan untuk acara tersebut!";
+      } else if (lowerText.includes('submit') || lowerText.includes('create') || lowerText.includes('hantar') || lowerText.includes('buat')) {
+        aiResponse = "Jika anda adalah ahli **Jawatankuasa**, anda boleh menghantar acara untuk kelulusan dengan mengklik **'Hantar Acara'** di bar navigasi. Isi butiran acara dan klik hantar. Admin akan menyemaknya tidak lama lagi!";
+      } else if (lowerText.includes('admin') || lowerText.includes('approve') || lowerText.includes('lulus')) {
+        aiResponse = "Admin boleh mengurus dan meluluskan penyerahan acara yang sedang menunggu di tab **'Papan Pemuka Admin'** di bar navigasi. Mereka boleh meluluskan atau menolak dengan maklum balas.";
+      } else if (lowerText.includes('category') || lowerText.includes('kategori') || lowerText.includes('type')) {
+        aiResponse = "Kami mempunyai beberapa kategori acara: **Bengkel, Pertandingan, Ceramah, Perjumpaan Sosial, Sukan, Pengambilan Pekerja, dan Lain-lain**. Anda boleh melayari kategori tersebut menggunakan grid penapis di halaman Teroka!";
+      } else if (lowerText.includes('hello') || lowerText.includes('hi') || lowerText.includes('hey') || lowerText.includes('assalamualaikum')) {
+        aiResponse = "Hello! 👋 Bagaimana saya boleh membantu anda dengan UNIEvent hari ini?";
+      } else if (lowerText.includes('thank') || lowerText.includes('tq') || lowerText.includes('terima kasih')) {
+        aiResponse = "Sama-sama! Beritahu saya jika anda memerlukan bantuan lain. 😊";
+      }
+    } else {
+      aiResponse = "I'm here to help! I can answer questions about event registration, SCORUN points, or how to submit your own event. Try asking: 'how to register' or 'what is scorun?'";
+      
+      if (lowerText.includes('register') || lowerText.includes('daftar') || lowerText.includes('rsvp')) {
+        aiResponse = "To register for an event, click on any event card on the Discover page, then click the amber **'Register Now'** button in the sidebar. Please make sure you are logged in first!";
+      } else if (lowerText.includes('scorun') || lowerText.includes('point') || lowerText.includes('mata')) {
+        aiResponse = "SCORUN points are student activity credits at UNITEN. Events showing an amber SCORUN tag will automatically grant you those points once you are approved/attend the event!";
+      } else if (lowerText.includes('submit') || lowerText.includes('create') || lowerText.includes('hantar') || lowerText.includes('buat')) {
+        aiResponse = "If you are a Committee member, you can submit events for approval by clicking **'Submit Event'** in the navbar. Fill in the event details and click submit. Admins will review it shortly!";
+      } else if (lowerText.includes('admin') || lowerText.includes('approve') || lowerText.includes('lulus')) {
+        aiResponse = "Admins can manage and approve pending event submissions in the **'Admin Dashboard'** tab in the navbar. They can approve or reject with feedback.";
+      } else if (lowerText.includes('category') || lowerText.includes('kategori') || lowerText.includes('type')) {
+        aiResponse = "We have several event categories: **Workshops, Competitions, Talks, Social gatherings, Sports, Hiring drives, and Others**. You can browse them using the filter grid on the Discover page!";
+      } else if (lowerText.includes('hello') || lowerText.includes('hi') || lowerText.includes('hey') || lowerText.includes('assalamualaikum')) {
+        aiResponse = "Hello! 👋 How can I assist you with UNIEvent today?";
+      } else if (lowerText.includes('thank') || lowerText.includes('tq') || lowerText.includes('terima kasih')) {
+        aiResponse = "You're very welcome! Let me know if you need anything else. 😊";
+      }
     }
     
     // Simple markdown helper for bold text
@@ -2116,10 +2179,13 @@ window.resetAIChat = function() {
   const body = document.getElementById('ai-chat-body');
   if (!body) return;
   
+  const translations = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
+  const welcomeText = translations.ai_chat_welcome || "Hi there! 👋 I'm your UNIEvent AI Assistant. Ask me anything about events, SCORUN points, registration, or how to submit your own event!";
+  
   body.innerHTML = `
     <div class="ai-chat-msg-wrapper ai-msg">
       <div class="ai-chat-msg">
-        Hi there! 👋 I'm your UNIEvent AI Assistant. Ask me anything about events, SCORUN points, registration, or how to submit your own event!
+        ${welcomeText}
       </div>
     </div>
   `;
@@ -2134,7 +2200,8 @@ window.resetAIChat = function() {
     input.focus();
   }
   
-  showToast('Chat restarted', 'info');
+  const toastMsg = currentLang === 'en' ? 'Chat restarted' : 'Sembang dimulakan semula';
+  showToast(toastMsg, 'info');
 };
 
 window.askAISuggestion = function(questionText) {

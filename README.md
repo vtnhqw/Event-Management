@@ -6,7 +6,7 @@ A modern, premium Event Management prototype built entirely with HTML, CSS, and 
 
 - **Dark Mode Integration**: A flawless, completely customized Light and Dark mode system leveraging CSS Variables with smooth transitions and no Flash of Unstyled Content (FOUC).
 - **AI Chat Assistant Widget**:
-  - A beautiful floating chatbot in the bottom-right corner of the screen, active for **guest visitors** and **students** (hidden for Admin/Committee).
+  - A beautiful floating chatbot in the bottom-right corner of the screen, active for all users (guest visitors, students, committee members, and admins).
   - Features simulated typing indicators, smooth-scrolling logs, "New Chat" session refreshers, and global keyboard shortcuts (e.g., `Escape` key close).
   - Tactile suggestion chips ("How to register?", "What is SCORUN?") with pixel-perfect flex alignments that auto-submit queries.
   - Rate-limit input blocking that disables text inputs and send buttons while responses are generating.
