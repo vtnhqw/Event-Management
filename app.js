@@ -270,12 +270,13 @@ function router() {
   const navContainer = document.getElementById('navbar-container');
   const globalFooter = document.getElementById('global-footer');
   if (navContainer) navContainer.style.display = 'block';
-  if (globalFooter) globalFooter.style.display = 'block';
   
   if (viewId === 'login') {
+    if (globalFooter) globalFooter.style.display = 'none';
     document.body.classList.add('auth-page'); 
     renderNav();
   } else {
+    if (globalFooter) globalFooter.style.display = 'block';
     document.body.classList.remove('auth-page');
     if (authCarouselTimer) {
       clearInterval(authCarouselTimer);
