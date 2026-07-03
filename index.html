@@ -158,6 +158,18 @@
                 <div class="category-count"><span id="count-Sports">0</span> Events</div>
               </div>
             </div>
+            <div class="category-card" data-category="Hiring">
+              <div class="category-icon icon-hiring">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+                </svg>
+              </div>
+              <div class="category-info">
+                <div class="category-name" data-i18n="filter_hiring">Hiring</div>
+                <div class="category-count"><span id="count-Hiring">0</span> Events</div>
+              </div>
+            </div>
             <div class="category-card" data-category="Other">
               <div class="category-icon icon-other">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -186,10 +198,28 @@
 
         <!-- Left Showcase Panel -->
         <div class="auth-left">
-          <img src="auth-hero.png" alt="UNIEvent" class="auth-left-img">
-          <h2 class="auth-left-heading">Discover campus events &amp; enjoy the best social life</h2>
-          <p class="auth-left-sub">Join thousands of students at UNITEN finding clubs, workshops, sports, and more — all
-            in one place.</p>
+          <div class="auth-carousel-container">
+            <div class="auth-carousel-track">
+              <!-- Slide 1 -->
+              <div class="auth-slide">
+                <img src="auth-hero.png" alt="UNIEvent" class="auth-left-img">
+                <h2 class="auth-left-heading">Discover campus events &amp; enjoy the best social life</h2>
+                <p class="auth-left-sub">Join thousands of students at UNITEN finding clubs, workshops, sports, and more — all in one place.</p>
+              </div>
+              <!-- Slide 2 -->
+              <div class="auth-slide">
+                <img src="auth-hero-2.jpg" alt="UNIEvent" class="auth-left-img">
+                <h2 class="auth-left-heading">Boost your skills at student workshops</h2>
+                <p class="auth-left-sub">Learn coding, design, career prep, and more from industry professionals and peers.</p>
+              </div>
+              <!-- Slide 3 -->
+              <div class="auth-slide">
+                <img src="auth-hero-3.jpg" alt="UNIEvent" class="auth-left-img">
+                <h2 class="auth-left-heading">Find your team in sports &amp; clubs</h2>
+                <p class="auth-left-sub">From friendly tournaments to weekly meetups, stay active and build lifelong connections.</p>
+              </div>
+            </div>
+          </div>
           <div class="auth-dots">
             <div class="auth-dot active" data-slide="0"></div>
             <div class="auth-dot" data-slide="1"></div>
@@ -592,6 +622,7 @@
                       <button type="button" class="month-option category-option" data-val="Talk">Talk</button>
                       <button type="button" class="month-option category-option" data-val="Social">Social</button>
                       <button type="button" class="month-option category-option" data-val="Sports">Sports</button>
+                      <button type="button" class="month-option category-option" data-val="Hiring">Hiring</button>
                       <button type="button" class="month-option category-option" data-val="Other">Other</button>
                     </div>
                   </div>

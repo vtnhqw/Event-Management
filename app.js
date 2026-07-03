@@ -44,6 +44,21 @@ const SEED_EVENTS = [
     status: 'approved',
     registrations: 78,
     scorun: 0
+  },
+  {
+    id: '4',
+    title: 'SRC Committee Recruitment Interviews',
+    category: 'Hiring',
+    description: 'We are looking for passionate students to join the Student Representative Council (SRC) for the upcoming term. Sign up for your interview slot now!',
+    event_date: '2026-07-20',
+    start_time: '09:00',
+    end_time: '17:00',
+    venue: 'Student Activity Center Meeting Room',
+    image_url: 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&q=80&w=800',
+    requested_by_name: 'Student Representative Council',
+    status: 'approved',
+    registrations: 34,
+    scorun: 1
   }
 ];
 
@@ -52,7 +67,7 @@ const TRANSLATIONS = {
     nav_submit: "Submit Event", nav_my_events: "My Events", nav_admin: "Admin Dashboard", nav_logout: "Logout",
     role_student: "STUDENT", role_committee: "COMMITTEE", role_admin: "ADMIN",
     discover_title: "Discover Events", discover_subtitle: "Find and join what's happening at UNITEN",
-    filter_all: "All", filter_workshop: "Workshop", filter_competition: "Competition", filter_talk: "Talk", filter_social: "Social", filter_sports: "Sports", filter_other: "Other",
+    filter_all: "All", filter_workshop: "Workshop", filter_competition: "Competition", filter_talk: "Talk", filter_social: "Social", filter_sports: "Sports", filter_hiring: "Hiring", filter_other: "Other",
     empty_events: "No events found", empty_events_sub: "There are no approved events in this category yet.",
     login_title: "Get Started", login_sub: "Join UNIEvent Prototype", lbl_name: "Full Name", lbl_role: "Role", btn_enter: "Enter Prototype",
     about_event: "About this event", btn_register: "Register Now",
@@ -68,7 +83,7 @@ const TRANSLATIONS = {
     nav_submit: "Hantar Acara", nav_my_events: "Acara Saya", nav_admin: "Papan Pemuka Admin", nav_logout: "Log Keluar",
     role_student: "PELAJAR", role_committee: "JAWATANKUASA", role_admin: "ADMIN",
     discover_title: "Teroka Acara", discover_subtitle: "Cari dan sertai aktiviti di UNITEN",
-    filter_all: "Semua", filter_workshop: "Bengkel", filter_competition: "Pertandingan", filter_talk: "Ceramah", filter_social: "Sosial", filter_sports: "Sukan", filter_other: "Lain-lain",
+    filter_all: "Semua", filter_workshop: "Bengkel", filter_competition: "Pertandingan", filter_talk: "Ceramah", filter_social: "Sosial", filter_sports: "Sukan", filter_hiring: "Pengambilan", filter_other: "Lain-lain",
     empty_events: "Tiada acara dijumpai", empty_events_sub: "Tiada acara yang diluluskan dalam kategori ini.",
     login_title: "Mula Sekarang", login_sub: "Sertai Prototaip UNIEvent", lbl_name: "Nama Penuh", lbl_role: "Peranan", btn_enter: "Masuk Prototaip",
     about_event: "Tentang acara ini", btn_register: "Daftar Sekarang",
@@ -85,6 +100,7 @@ const TRANSLATIONS = {
 let currentUser = JSON.parse(localStorage.getItem('uni_user') || 'null');
 let isDarkMode = localStorage.getItem('uni_theme') === 'dark';
 let currentLang = localStorage.getItem('uni_lang') || 'en';
+let authCarouselTimer = null;
 
 function applyTheme() {
   const isDark = localStorage.getItem('uni_theme') === 'dark';
@@ -162,6 +178,14 @@ function initDB() {
         updated = true;
       }
     });
+    // Ensure the new seed event (id '4') is added
+    if (!events.find(ev => ev.id === '4')) {
+      const srcHiring = SEED_EVENTS.find(s => s.id === '4');
+      if (srcHiring) {
+        events.push(srcHiring);
+        updated = true;
+      }
+    }
     if (updated) localStorage.setItem('uni_events', JSON.stringify(events));
   }
   
@@ -241,6 +265,10 @@ function router() {
     renderNav();
   } else {
     document.body.classList.remove('auth-page');
+    if (authCarouselTimer) {
+      clearInterval(authCarouselTimer);
+      authCarouselTimer = null;
+    }
     checkAuth(true);
   }
   
@@ -366,7 +394,7 @@ document.addEventListener('click', (e) => {
 });
 
 function updateCategoryCounts(events) {
-  const counts = { 'All': events.length, 'Workshop': 0, 'Competition': 0, 'Talk': 0, 'Social': 0, 'Sports': 0, 'Other': 0 };
+  const counts = { 'All': events.length, 'Workshop': 0, 'Competition': 0, 'Talk': 0, 'Social': 0, 'Sports': 0, 'Hiring': 0, 'Other': 0 };
   events.forEach(e => {
     if(counts[e.category] !== undefined) counts[e.category]++;
   });
@@ -462,8 +490,83 @@ function renderEvents() {
 // --- LOGIN VIEW ---
 let loginActiveRole = 'student';
 
+let authCarouselIndex = 0;
+
+function initAuthCarousel() {
+  const dots = document.querySelectorAll('.auth-dot');
+  const track = document.querySelector('.auth-carousel-track');
+
+  if (!dots.length || !track) return;
+
+  // Clear any existing timer to avoid duplicates
+  if (authCarouselTimer) {
+    clearInterval(authCarouselTimer);
+  }
+
+  // Click handler for dots
+  dots.forEach(dot => {
+    dot.onclick = () => {
+      const targetIndex = parseInt(dot.getAttribute('data-slide') || '0', 10);
+      if (targetIndex === authCarouselIndex) return;
+      
+      // Reset timer on manual click
+      startAutoplay();
+      goToSlide(targetIndex);
+    };
+  });
+
+  function goToSlide(index) {
+    authCarouselIndex = index;
+    
+    // Slide the track
+    track.style.transform = `translateX(-${authCarouselIndex * 100}%)`;
+
+    // Remove active and animating classes immediately from all dots
+    dots.forEach(dot => {
+      dot.classList.remove('active');
+      dot.classList.remove('animating');
+    });
+
+    // Update active and animating class on dots
+    const activeDot = dots[authCarouselIndex];
+    if (activeDot) {
+      activeDot.classList.add('active');
+      void activeDot.offsetWidth; // force browser layout reflow to reset transition
+      activeDot.classList.add('animating');
+    }
+  }
+
+  function startAutoplay() {
+    if (authCarouselTimer) clearInterval(authCarouselTimer);
+    authCarouselTimer = setInterval(() => {
+      let nextIndex = (authCarouselIndex + 1) % 3;
+      goToSlide(nextIndex);
+    }, 5000); // auto-slide every 5 seconds
+  }
+
+  // Set initial active state correctly
+  dots.forEach((dot, idx) => {
+    if (idx === authCarouselIndex) {
+      dot.classList.add('active');
+      void dot.offsetWidth; // force layout reflow
+      dot.classList.add('animating');
+    } else {
+      dot.classList.remove('active');
+      dot.classList.remove('animating');
+    }
+  });
+
+  // Set initial position
+  track.style.transform = `translateX(-${authCarouselIndex * 100}%)`;
+
+  // Start autoplay
+  startAutoplay();
+}
+
 function initLoginView() {
   checkAuth(false);
+  initAuthCarousel();
+  
   const form = document.getElementById('signup-form');
   if(form) {
       form.onsubmit = (e) => {
@@ -950,10 +1053,10 @@ function renderNav() {
         <div style="display: flex; align-items: center; gap: 2.5rem; height: 100%;">
           <a href="#discover" class="nav-brand">UNI<span>Event</span></a>
         </div>
-        <div class="nav-right">
-          <button id="lang-toggle-btn" class="nav-icon-btn" style="font-weight:700; font-size:0.9rem; width: 40px; border-radius: 8px;" onclick="toggleLang()">${currentLang.toUpperCase()}</button>
+        <div class="nav-right" style="display: flex; align-items: center; gap: 0.25rem;">
+          <button id="lang-toggle-btn" class="nav-icon-btn" style="font-weight: 700; font-size: 0.9rem;" onclick="toggleLang()">${currentLang.toUpperCase()}</button>
           <button id="theme-toggle-btn" class="nav-icon-btn" onclick="toggleTheme()" aria-label="Toggle theme"></button>
-          <a href="#login" class="btn btn-primary" style="padding: 0.5rem 1.2rem; font-size: 0.85rem; border-radius: 9999px;">Sign In</a>
+          <a href="#login" class="btn btn-primary" style="padding: 0.5rem 1.2rem; font-size: 0.85rem; border-radius: 9999px; margin-left: 0.5rem;">Sign In</a>
         </div>
       </div>
     `;
@@ -988,8 +1091,8 @@ function renderNav() {
         <div class="nav-links">${links}</div>
       </div>
       <div class="nav-right" style="display: flex; align-items: center; gap: 0.25rem;">
-        <button id="lang-toggle-btn" class="nav-icon-btn" style="display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; width: 40px; height: 40px; border-radius: 8px;" onclick="toggleLang()">${currentLang.toUpperCase()}</button>
-        <button id="theme-toggle-btn" class="nav-icon-btn" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 8px;" onclick="toggleTheme()" aria-label="Toggle theme"></button>
+        <button id="lang-toggle-btn" class="nav-icon-btn" style="font-weight: 700; font-size: 0.9rem;" onclick="toggleLang()">${currentLang.toUpperCase()}</button>
+        <button id="theme-toggle-btn" class="nav-icon-btn" onclick="toggleTheme()" aria-label="Toggle theme"></button>
         
         <div class="user-controls-wrapper" style="display: flex; align-items: center; gap: 0.25rem; margin-left: 0.25rem;">
           <!-- User Profile Component -->
@@ -1002,7 +1105,7 @@ function renderNav() {
           </div>
           
           <!-- Logout Button Component -->
-          <button onclick="handleLogout()" class="nav-logout-btn" aria-label="Logout" title="Logout" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; border: none; background: transparent; color: #EF4444; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.backgroundColor='rgba(239, 68, 68, 0.1)'" onmouseout="this.style.backgroundColor='transparent'" onmousedown="this.style.transform='scale(0.92)'" onmouseup="this.style.transform='scale(1)'">
+          <button onclick="handleLogout()" class="nav-logout-btn" aria-label="Logout" title="Logout" style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 8px; border: none; background: transparent; color: #EF4444; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.backgroundColor='rgba(239, 68, 68, 0.1)'" onmouseout="this.style.backgroundColor='transparent'" onmousedown="this.style.transform='scale(0.92)'" onmouseup="this.style.transform='scale(1)'">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
           </button>
         </div>
