@@ -870,6 +870,76 @@
 
   </div>
   <footer id="global-footer" class="site-footer">UNIEvent Prototype &copy; 2026. All rights reserved.</footer>
+
+  <!-- AI CHAT ASSISTANT WIDGET -->
+  <div class="ai-chat-widget" id="ai-chat-widget">
+    <!-- Floating Action Button (FAB) -->
+    <button class="ai-chat-fab" onclick="toggleAIChat()" aria-label="Open AI Assistant" aria-expanded="false" aria-haspopup="dialog">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+      </svg>
+      <span class="ai-chat-pulse"></span>
+    </button>
+
+    <!-- Chat Dialog Window -->
+    <div class="ai-chat-window card" id="ai-chat-window">
+      <!-- Header -->
+      <div class="ai-chat-header">
+        <div class="ai-chat-header-info">
+          <div class="ai-chat-avatar">
+            <!-- Sparkles/AI icon -->
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m11.314 11.314l.707.707M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/>
+            </svg>
+          </div>
+          <div>
+            <div class="ai-chat-title">UNIEvent AI</div>
+            <div class="ai-chat-status">
+              <span class="status-dot"></span>
+              Online Assistant
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 0.35rem; align-items: center;">
+          <button class="ai-chat-header-btn" onclick="resetAIChat()" aria-label="New Chat" title="Start New Conversation">
+            <!-- Plus Icon -->
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </button>
+          <button class="ai-chat-header-btn" onclick="toggleAIChat()" aria-label="Close Chat" title="Close Chat">
+            <!-- Close Icon -->
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Messages Body -->
+      <div class="ai-chat-body" id="ai-chat-body">
+        <div class="ai-chat-msg-wrapper ai-msg">
+          <div class="ai-chat-msg">
+            Hi there! 👋 I'm your UNIEvent AI Assistant. Ask me anything about events, SCORUN points, registration, or how to submit your own event!
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Footer -->
+      <div class="ai-chat-footer">
+        <input type="text" class="ai-chat-input" id="ai-chat-input" placeholder="Type a message..." onkeydown="if(event.key === 'Enter') sendAIChatMessage()">
+        <button class="ai-chat-send-btn" onclick="sendAIChatMessage()" aria-label="Send Message">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polyline points="22 2 15 22 11 13 2 9 22 2"></polyline>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script src="app.js?v=event-loader-fix-3" defer></script>
 </body>
 

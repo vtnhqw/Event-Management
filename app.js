@@ -1980,3 +1980,129 @@ function renderNav() {
   
   updateThemeIcon();
 }
+
+// --- AI CHAT ASSISTANT ---
+window.toggleAIChat = function() {
+  const widget = document.getElementById('ai-chat-widget');
+  if (!widget) return;
+  widget.classList.toggle('chat-open');
+  
+  const isOpen = widget.classList.contains('chat-open');
+  const fab = widget.querySelector('.ai-chat-fab');
+  if (fab) {
+    fab.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+  }
+  
+  if (isOpen) {
+    const body = document.getElementById('ai-chat-body');
+    if (body) body.scrollTop = body.scrollHeight;
+    
+    setTimeout(() => {
+      const input = document.getElementById('ai-chat-input');
+      if (input) input.focus();
+    }, 200);
+  }
+};
+
+// Close chat on Escape key press
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape') {
+    const widget = document.getElementById('ai-chat-widget');
+    if (widget && widget.classList.contains('chat-open')) {
+      toggleAIChat();
+    }
+  }
+});
+
+window.sendAIChatMessage = function() {
+  const input = document.getElementById('ai-chat-input');
+  const body = document.getElementById('ai-chat-body');
+  if (!input || !body) return;
+  
+  const text = input.value.trim();
+  if (!text) return;
+  
+  // Append User Message
+  const userMsgHtml = `
+    <div class="ai-chat-msg-wrapper user-msg">
+      <div class="ai-chat-msg">${escapeHTML(text)}</div>
+    </div>
+  `;
+  body.insertAdjacentHTML('beforeend', userMsgHtml);
+  input.value = '';
+  body.scrollTop = body.scrollHeight;
+  
+  // Append Typing Indicator
+  const typingId = 'typing-' + Date.now();
+  const typingHtml = `
+    <div class="ai-chat-msg-wrapper ai-msg" id="${typingId}">
+      <div class="ai-chat-msg typing-indicator">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+    </div>
+  `;
+  body.insertAdjacentHTML('beforeend', typingHtml);
+  body.scrollTop = body.scrollHeight;
+  
+  // Simulated AI response logic
+  setTimeout(() => {
+    // Remove typing indicator
+    const typingIndicatorEl = document.getElementById(typingId);
+    if (typingIndicatorEl) typingIndicatorEl.remove();
+    
+    let aiResponse = "I'm here to help! I can answer questions about event registration, SCORUN points, or how to submit your own event. Try asking: 'how to register' or 'what is scorun?'";
+    const lowerText = text.toLowerCase();
+    
+    if (lowerText.includes('register') || lowerText.includes('daftar') || lowerText.includes('rsvp')) {
+      aiResponse = "To register for an event, click on any event card on the Discover page, then click the amber **'Register Now'** button in the sidebar. Please make sure you are logged in first!";
+    } else if (lowerText.includes('scorun') || lowerText.includes('point') || lowerText.includes('mata')) {
+      aiResponse = "SCORUN points are student activity credits at UNITEN. Events showing an amber SCORUN tag will automatically grant you those points once you are approved/attend the event!";
+    } else if (lowerText.includes('submit') || lowerText.includes('create') || lowerText.includes('hantar') || lowerText.includes('buat')) {
+      aiResponse = "If you are a Committee member, you can submit events for approval by clicking **'Submit Event'** in the navbar. Fill in the event details and click submit. Admins will review it shortly!";
+    } else if (lowerText.includes('admin') || lowerText.includes('approve') || lowerText.includes('lulus')) {
+      aiResponse = "Admins can manage and approve pending event submissions in the **'Admin Dashboard'** tab in the navbar. They can approve or reject with feedback.";
+    } else if (lowerText.includes('category') || lowerText.includes('kategori') || lowerText.includes('type')) {
+      aiResponse = "We have several event categories: **Workshops, Competitions, Talks, Social gatherings, Sports, Hiring drives, and Others**. You can browse them using the filter grid on the Discover page!";
+    } else if (lowerText.includes('hello') || lowerText.includes('hi') || lowerText.includes('hey') || lowerText.includes('assalamualaikum')) {
+      aiResponse = "Hello! 👋 How can I assist you with UNIEvent today?";
+    } else if (lowerText.includes('thank') || lowerText.includes('tq') || lowerText.includes('terima kasih')) {
+      aiResponse = "You're very welcome! Let me know if you need anything else. 😊";
+    }
+    
+    // Simple markdown helper for bold text
+    const formattedResponse = aiResponse.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    
+    const aiMsgHtml = `
+      <div class="ai-chat-msg-wrapper ai-msg">
+        <div class="ai-chat-msg">${formattedResponse}</div>
+      </div>
+    `;
+    body.insertAdjacentHTML('beforeend', aiMsgHtml);
+    body.scrollTop = body.scrollHeight;
+  }, 1000);
+};
+
+window.resetAIChat = function() {
+  const body = document.getElementById('ai-chat-body');
+  if (!body) return;
+  
+  body.innerHTML = `
+    <div class="ai-chat-msg-wrapper ai-msg">
+      <div class="ai-chat-msg">
+        Hi there! 👋 I'm your UNIEvent AI Assistant. Ask me anything about events, SCORUN points, registration, or how to submit your own event!
+      </div>
+    </div>
+  `;
+  
+  const input = document.getElementById('ai-chat-input');
+  if (input) {
+    input.value = '';
+    input.focus();
+  }
+  
+  showToast('Chat restarted', 'info');
+};
+
+
