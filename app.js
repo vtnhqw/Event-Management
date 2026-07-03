@@ -1,5 +1,6 @@
 // MOCK DATABASE USING LOCALSTORAGE
-const SEED_EVENTS = [
+const DATA_EVENTS_URL = 'data/events.json';
+const FALLBACK_EVENTS = [
   {
     id: '1',
     title: 'UNITEN Tech Hackathon 2026',
@@ -62,6 +63,21 @@ const SEED_EVENTS = [
   }
 ];
 
+let SEED_EVENTS = FALLBACK_EVENTS;
+
+async function loadSeedEvents() {
+  try {
+    const response = await fetch(DATA_EVENTS_URL, { cache: 'no-cache' });
+    if (!response.ok) throw new Error(`Unable to load ${DATA_EVENTS_URL}`);
+    const events = await response.json();
+    if (!Array.isArray(events)) throw new Error(`${DATA_EVENTS_URL} must contain an array`);
+    SEED_EVENTS = events.map(normalizeEvent);
+  } catch (e) {
+    console.warn(`${DATA_EVENTS_URL} could not be loaded. Using fallback events from app.js.`, e);
+    SEED_EVENTS = FALLBACK_EVENTS.map(normalizeEvent);
+  }
+}
+
 const SEED_USERS = [
   { id: 'u_student_1', studentId: 'SW01083101', email: null, password: 'student123', name: 'Ahmad Arif', role: 'student' },
   { id: 'u_committee_1', studentId: 'SW01083102', email: null, password: 'committee123', name: 'Siti Rahman', role: 'committee' },
@@ -117,12 +133,31 @@ const TRANSLATIONS = {
   }
 };
 
-let currentUser = JSON.parse(localStorage.getItem('uni_user') || 'null');
+function getStoredUser() {
+  try {
+    const user = JSON.parse(localStorage.getItem('uni_user') || 'null');
+    const validRoles = ['student', 'committee', 'admin'];
+    if (!user || typeof user !== 'object' || !user.id || !validRoles.includes(user.role)) return null;
+    return {
+      ...user,
+      name: String(user.name || 'User')
+    };
+  } catch (e) {
+    localStorage.removeItem('uni_user');
+    return null;
+  }
+}
+
+let currentUser = getStoredUser();
 let isDarkMode = localStorage.getItem('uni_theme') === 'dark';
 let currentLang = localStorage.getItem('uni_lang') || 'en';
 if (currentLang === 'ms') {
   currentLang = 'my';
   localStorage.setItem('uni_lang', 'my');
+}
+if (!TRANSLATIONS[currentLang]) {
+  currentLang = 'en';
+  localStorage.setItem('uni_lang', 'en');
 }
 let authCarouselTimer = null;
 
@@ -140,14 +175,16 @@ function applyTheme() {
 function applyLang() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
-    if (TRANSLATIONS[currentLang][key]) {
-      el.textContent = TRANSLATIONS[currentLang][key];
+    const translations = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
+    if (translations[key]) {
+      el.textContent = translations[key];
     }
   });
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     const key = el.getAttribute('data-i18n-placeholder');
-    if (TRANSLATIONS[currentLang][key]) {
-      el.placeholder = TRANSLATIONS[currentLang][key];
+    const translations = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
+    if (translations[key]) {
+      el.placeholder = translations[key];
     }
   });
 }
@@ -188,29 +225,99 @@ function safeParseJSON(key, fallback) {
   catch(e) { localStorage.removeItem(key); return fallback; }
 }
 
+function normalizeEvent(rawEvent) {
+  const ev = rawEvent && typeof rawEvent === 'object' ? rawEvent : {};
+  const seed = SEED_EVENTS.find(seedEvent => seedEvent.id === ev.id);
+  const scorun = typeof ev.scorun === 'undefined' && seed ? seed.scorun : ev.scorun;
+  return {
+    ...ev,
+    id: String(ev.id || `ev_${Date.now()}`),
+    title: String(ev.title || 'Untitled Event'),
+    category: String(ev.category || 'Other'),
+    description: String(ev.description || 'No description provided.'),
+    event_date: String(ev.event_date || ''),
+    start_time: String(ev.start_time || ''),
+    end_time: String(ev.end_time || ''),
+    location_type: ev.location_type === 'online' ? 'online' : 'physical',
+    platform: ev.platform ? String(ev.platform) : '',
+    venue: String(ev.venue || ev.platform || 'Venue TBA'),
+    image_url: String(ev.image_url || ''),
+    requested_by: ev.requested_by || null,
+    requested_by_name: String(ev.requested_by_name || 'Unknown'),
+    status: String(ev.status || 'pending'),
+    registrations: Number.isFinite(Number(ev.registrations)) ? Number(ev.registrations) : 0,
+    scorun: Number.isFinite(Number(scorun)) ? Number(scorun) : 0,
+    reject_reason: ev.reject_reason ? String(ev.reject_reason) : null
+  };
+}
+
+function getEvents() {
+  return safeParseJSON('uni_events', []).map(normalizeEvent);
+}
+
+function saveEvents(events) {
+  localStorage.setItem('uni_events', JSON.stringify(events.map(normalizeEvent)));
+}
+
+function escapeHTML(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[char]));
+}
+
+function categoryBadgeClass(category) {
+  return `badge-cat-${String(category || 'Other').toLowerCase().replace(/[^a-z0-9_-]/g, '')}`;
+}
+
+function statusBadgeClass(status) {
+  return `badge-${String(status || 'pending').toLowerCase().replace(/[^a-z0-9_-]/g, '')}`;
+}
+
+function formatEventTimeRange(startTime, endTime) {
+  const start = startTime ? String(startTime).slice(0, 5) : '';
+  const end = endTime ? String(endTime).slice(0, 5) : '';
+  if (start && end) return `${start} - ${end}`;
+  return start || end || 'Time TBA';
+}
+
 function initDB() {
   if (!localStorage.getItem('uni_events')) {
-    localStorage.setItem('uni_events', JSON.stringify(SEED_EVENTS));
+    saveEvents(SEED_EVENTS);
   } else {
-    // Migrate old events
-    let events = safeParseJSON('uni_events', []);
-    let updated = false;
-    events.forEach(ev => {
-      if (typeof ev.scorun === 'undefined') {
-        const seed = SEED_EVENTS.find(s => s.id === ev.id);
-        ev.scorun = seed ? seed.scorun : 0;
+    // Migrate old events and refresh editable seed records from data/events.json.
+    const originalEvents = safeParseJSON('uni_events', []);
+    let events = getEvents();
+    let updated = JSON.stringify(originalEvents) !== JSON.stringify(events);
+
+    SEED_EVENTS.forEach(seedEvent => {
+      const seed = normalizeEvent(seedEvent);
+      const idx = events.findIndex(ev => ev.id === seed.id);
+      if (idx === -1) {
+        events.push(seed);
+        updated = true;
+        return;
+      }
+
+      const existing = events[idx];
+      const refreshedSeed = normalizeEvent({
+        ...seed,
+        registrations: existing.registrations,
+        status: existing.status || seed.status,
+        reject_reason: existing.reject_reason,
+        requested_by: existing.requested_by || seed.requested_by
+      });
+
+      if (JSON.stringify(existing) !== JSON.stringify(refreshedSeed)) {
+        events[idx] = refreshedSeed;
         updated = true;
       }
     });
-    // Ensure the new seed event (id '4') is added
-    if (!events.find(ev => ev.id === '4')) {
-      const srcHiring = SEED_EVENTS.find(s => s.id === '4');
-      if (srcHiring) {
-        events.push(srcHiring);
-        updated = true;
-      }
-    }
-    if (updated) localStorage.setItem('uni_events', JSON.stringify(events));
+
+    if (updated) saveEvents(events);
   }
   
   if (!localStorage.getItem('uni_rsvps')) {
@@ -226,7 +333,7 @@ function authenticateUser(role, credentials) {
   const users = safeParseJSON('uni_users', SEED_USERS);
   if (role === 'admin') {
     const email = (credentials.email || '').trim().toLowerCase();
-    return users.find(u => u.role === 'admin' && u.email.toLowerCase() === email && u.password === credentials.password);
+    return users.find(u => u.role === 'admin' && String(u.email || '').toLowerCase() === email && u.password === credentials.password);
   }
   const studentId = (credentials.studentId || '').trim().toUpperCase();
   return users.find(u => u.role === role && u.studentId === studentId && u.password === credentials.password);
@@ -289,64 +396,70 @@ const routes = {
 };
 
 function router() {
-  window.scrollTo({ top: 0, behavior: 'smooth' });
   const hash = window.location.hash.split('?')[0];
   const viewId = hash ? hash.substring(1) : 'discover';
 
-  // Auth guard — redirect before rendering protected views
-  if (viewId === 'login' && currentUser) {
-    window.location.hash = '#discover';
-    return;
-  }
-  if (PROTECTED_ROUTES.includes(viewId) && !currentUser) {
-    window.location.hash = '#login';
-    return;
-  }
-  
-  // Hide all views and reset animations
-  document.querySelectorAll('.page-view').forEach(el => {
-    el.classList.remove('active');
-    el.classList.remove('animate-in');
-  });
-  
-  // Show target view
-  const targetView = document.getElementById('view-' + viewId);
-  if (targetView) {
-    targetView.classList.add('active');
-    void targetView.offsetWidth; // Force reflow
-    targetView.classList.add('animate-in');
-  }
-  
-  // Toggle Navbar
-  const navContainer = document.getElementById('navbar-container');
-  const globalFooter = document.getElementById('global-footer');
-  if (navContainer) navContainer.style.display = 'block';
-  
-  if (viewId === 'login') {
-    if (globalFooter) globalFooter.style.display = 'none';
-    document.body.classList.add('auth-page'); 
-    renderNav();
-  } else {
-    if (globalFooter) globalFooter.style.display = 'block';
-    document.body.classList.remove('auth-page');
-    if (authCarouselTimer) {
-      clearInterval(authCarouselTimer);
-      authCarouselTimer = null;
+  try {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Auth guard — redirect before rendering protected views
+    if (viewId === 'login' && currentUser) {
+      window.location.hash = '#discover';
+      return;
     }
-    renderNav();
+    if (PROTECTED_ROUTES.includes(viewId) && !currentUser) {
+      window.location.hash = '#login';
+      return;
+    }
+  
+    // Hide all views and reset animations
+    document.querySelectorAll('.page-view').forEach(el => {
+      el.classList.remove('active');
+      el.classList.remove('animate-in');
+    });
+  
+    // Show target view
+    const targetView = document.getElementById('view-' + viewId);
+    if (targetView) {
+      targetView.classList.add('active');
+      void targetView.offsetWidth; // Force reflow
+      targetView.classList.add('animate-in');
+    }
+  
+    // Toggle Navbar
+    const navContainer = document.getElementById('navbar-container');
+    const globalFooter = document.getElementById('global-footer');
+    if (navContainer) navContainer.style.display = 'block';
+  
+    if (viewId === 'login') {
+      if (globalFooter) globalFooter.style.display = 'none';
+      document.body.classList.add('auth-page'); 
+      renderNav();
+    } else {
+      if (globalFooter) globalFooter.style.display = 'block';
+      document.body.classList.remove('auth-page');
+      if (authCarouselTimer) {
+        clearInterval(authCarouselTimer);
+        authCarouselTimer = null;
+      }
+      renderNav();
+    }
+  
+    // Call init function
+    const initFunc = routes[hash] || routes['#discover'];
+    if (initFunc) initFunc();
+  
+    // Highlight active nav link
+    document.querySelectorAll('.nav-link').forEach(link => {
+      if (link.getAttribute('href') === (hash || '#discover')) link.classList.add('active');
+      else link.classList.remove('active');
+    });
+  
+    setTimeout(applyLang, 0);
+  } catch (e) {
+    console.error('Route render failed', e);
+    if (viewId === 'event') renderEventError();
   }
-  
-  // Call init function
-  const initFunc = routes[hash] || routes['#discover'];
-  if (initFunc) initFunc();
-  
-  // Highlight active nav link
-  document.querySelectorAll('.nav-link').forEach(link => {
-    if (link.getAttribute('href') === (hash || '#discover')) link.classList.add('active');
-    else link.classList.remove('active');
-  });
-  
-  setTimeout(applyLang, 0);
 }
 
 // Override checkAuth and logout from app.js to use hashes
@@ -370,7 +483,8 @@ function handleLogout() {
   window.location.hash = '#login';
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await loadSeedEvents();
   initDB();
   applyTheme();
   applyLang();
@@ -502,7 +616,7 @@ function updateCategoryCounts(events) {
 function renderEvents() {
   const grid = document.getElementById('events-grid');
   if(!grid) return;
-  let allEvents = JSON.parse(localStorage.getItem('uni_events') || '[]').filter(e => e.status === 'approved');
+  let allEvents = getEvents().filter(e => e.status === 'approved');
   allEvents.sort((a, b) => {
     const dateA = new Date(a.event_date ? a.event_date.split(' to ')[0] : '');
     const dateB = new Date(b.event_date ? b.event_date.split(' to ')[0] : '');
@@ -548,28 +662,32 @@ function renderEvents() {
     grid.innerHTML = filtered.map((event, index) => {
       const count = event.registrations || 0;
       const dateStr = formatEventDateRangeShort(event.event_date);
-      const timeStr = event.start_time ? event.start_time.slice(0,5) : null;
+      const timeStr = event.start_time ? formatEventTimeRange(event.start_time, '') : null;
+      const category = escapeHTML(event.category);
+      const title = escapeHTML(event.title);
+      const venue = escapeHTML(event.venue);
+      const imageUrl = escapeHTML(event.image_url);
       
       return `
         <a href="#event?id=${event.id}" class="card animate-in" style="animation-delay: ${index * 0.05}s; opacity: 0; display: block; text-decoration: none;">
           <div class="event-img-wrapper">
             ${event.image_url 
-              ? `<img src="${event.image_url}" alt="${event.title}" class="event-img" onerror="this.onerror=null; this.outerHTML='<div class=\\'event-img event-img-placeholder\\'><svg width=\\'40\\' height=\\'40\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'1.5\\' stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\'><rect x=\\'3\\' y=\\'3\\' width=\\'18\\' height=\\'18\\' rx=\\'2\\' ry=\\'2\\'></rect><circle cx=\\'8.5\\' cy=\\'8.5\\' r=\\'1.5\\'></circle><polyline points=\\'21 15 16 10 5 21\\'></polyline></svg></div>';">` 
+              ? `<img src="${imageUrl}" alt="${title}" class="event-img" onerror="this.onerror=null; this.outerHTML='<div class=\\'event-img event-img-placeholder\\'><svg width=\\'40\\' height=\\'40\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'1.5\\' stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\'><rect x=\\'3\\' y=\\'3\\' width=\\'18\\' height=\\'18\\' rx=\\'2\\' ry=\\'2\\'></rect><circle cx=\\'8.5\\' cy=\\'8.5\\' r=\\'1.5\\'></circle><polyline points=\\'21 15 16 10 5 21\\'></polyline></svg></div>';">` 
               : `<div class="event-img event-img-placeholder"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></div>`}
           </div>
           <div class="event-content">
             <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
-              <span class="badge badge-cat-${event.category.toLowerCase()}">${event.category}</span>
+              <span class="badge ${categoryBadgeClass(event.category)}">${category}</span>
               ${event.scorun > 0 ? `<span class="badge" style="background: var(--accent-glow); color: var(--accent); font-weight: 700;">${event.scorun} SCORUN</span>` : ''}
             </div>
-            <h3 class="event-title" style="margin-top: 0; color: var(--text-main);">${event.title}</h3>
+            <h3 class="event-title" style="margin-top: 0; color: var(--text-main);">${title}</h3>
             <div class="event-meta">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
               <span>${dateStr}${timeStr ? ' · ' + timeStr : ''}</span>
             </div>
             <div class="event-meta" style="margin-bottom: 0;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-              <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px;">${event.venue}</span>
+              <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px;">${venue}</span>
             </div>
             <div class="event-card-footer">
               <div class="attendee-chip">
@@ -795,7 +913,7 @@ function initAdminView() {
 }
 
 function loadAdminData() {
-  const allEvents = JSON.parse(localStorage.getItem('uni_events') || '[]');
+  const allEvents = getEvents();
   const pending = allEvents.filter(e => e.status === 'pending');
   const decided = allEvents.filter(e => e.status !== 'pending').slice(0, 10);
   renderPending(pending);
@@ -818,25 +936,33 @@ function renderPending(events) {
     return;
   }
 
-  container.innerHTML = events.map(ev => `
+  container.innerHTML = events.map(ev => {
+    const category = escapeHTML(ev.category);
+    const title = escapeHTML(ev.title);
+    const requestedBy = escapeHTML(ev.requested_by_name || 'Unknown');
+    const venue = escapeHTML(ev.venue);
+    const imageUrl = escapeHTML(ev.image_url);
+    const description = escapeHTML(ev.description);
+
+    return `
     <div class="card animate-in" style="padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;" id="ev-card-${ev.id}">
       <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;">
         <div style="flex: 1; min-width: 0;">
           <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
-            <span class="badge badge-cat-${ev.category.toLowerCase()}">${ev.category}</span>
+            <span class="badge ${categoryBadgeClass(ev.category)}">${category}</span>
           </div>
-          <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 0.25rem; color: var(--text-main);"><a href="#event?id=${ev.id}" style="color: inherit; text-decoration: none;">${ev.title}</a></h3>
+          <h3 style="font-size: 1.05rem; font-weight: 700; margin-bottom: 0.25rem; color: var(--text-main);"><a href="#event?id=${ev.id}" style="color: inherit; text-decoration: none;">${title}</a></h3>
           <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; flex-wrap: wrap; gap: 0.5rem;">
-            <span>By <strong>${ev.requested_by_name || 'Unknown'}</strong></span>
+            <span>By <strong>${requestedBy}</strong></span>
             <span>&bull;</span>
             <span>${formatEventDateRangeShort(ev.event_date)}</span>
             <span>&bull;</span>
-            <span>${ev.venue}</span>
+            <span>${venue}</span>
           </div>
         </div>
-        ${ev.image_url ? `<img src="${ev.image_url}" style="width: 56px; height: 56px; border-radius: 0.5rem; object-fit: cover; flex-shrink: 0;">` : ''}
+        ${ev.image_url ? `<img src="${imageUrl}" alt="${title}" style="width: 56px; height: 56px; border-radius: 0.5rem; object-fit: cover; flex-shrink: 0;">` : ''}
       </div>
-      <p style="font-size: 0.875rem; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.6;">${ev.description}</p>
+      <p style="font-size: 0.875rem; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.6;">${description}</p>
       
       <div id="reject-form-${ev.id}" style="display: none;">
         <textarea id="reject-reason-${ev.id}" class="form-control" rows="2" placeholder="Reason for rejection (required)" style="margin-bottom: 0.5rem; font-size: 0.9rem;"></textarea>
@@ -857,7 +983,8 @@ function renderPending(events) {
         </button>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 function renderDecided(events) {
@@ -870,10 +997,10 @@ function renderDecided(events) {
   container.innerHTML = events.map(ev => `
     <div class="card" style="padding: 1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem;">
       <div style="min-width: 0;">
-        <h4 style="font-weight: 600; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-main);"><a href="#event?id=${ev.id}" style="color: inherit; text-decoration: none;">${ev.title}</a></h4>
-        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem;">By ${ev.requested_by_name || 'Unknown'} &bull; ${formatEventDateRangeShort(ev.event_date)}</div>
+        <h4 style="font-weight: 600; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-main);"><a href="#event?id=${ev.id}" style="color: inherit; text-decoration: none;">${escapeHTML(ev.title)}</a></h4>
+        <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem;">By ${escapeHTML(ev.requested_by_name || 'Unknown')} &bull; ${formatEventDateRangeShort(ev.event_date)}</div>
       </div>
-      <span class="badge badge-${ev.status}" style="flex-shrink: 0;">${ev.status}</span>
+      <span class="badge ${statusBadgeClass(ev.status)}" style="flex-shrink: 0;">${escapeHTML(ev.status)}</span>
     </div>
   `).join('');
 }
@@ -886,12 +1013,12 @@ function handleDecision(id, status, reason = null) {
     card.style.opacity = '0';
   }
   setTimeout(() => {
-    const events = JSON.parse(localStorage.getItem('uni_events') || '[]');
+    const events = getEvents();
     const idx = events.findIndex(e => e.id === id);
     if (idx !== -1) {
       events[idx].status = status;
       events[idx].reject_reason = reason;
-      localStorage.setItem('uni_events', JSON.stringify(events));
+      saveEvents(events);
       if (status === 'approved') {
         showToast('Event approved successfully', 'success');
       } else {
@@ -925,25 +1052,49 @@ function submitReject(id) {
 
 // --- EVENT VIEW ---
 function initEventView() {
-  const hashParts = window.location.hash.split('?');
-  if (hashParts.length < 2) {
+  try {
+    const hashParts = window.location.hash.split('?');
+    if (hashParts.length < 2) {
       window.location.hash = '#discover';
       return;
+    }
+    const params = new URLSearchParams(hashParts[1]);
+    const eventId = params.get('id');
+    if (!eventId) {
+      window.location.hash = '#discover';
+      return;
+    }
+    renderEvent(eventId);
+  } catch (e) {
+    console.error('Event view failed', e);
+    renderEventError();
   }
-  const params = new URLSearchParams(hashParts[1]);
-  const eventId = params.get('id');
-  if (!eventId) {
-    window.location.hash = '#discover';
-    return;
-  }
-  renderEvent(eventId);
+}
+
+function renderEventError() {
+  const loading = document.getElementById('event-loading');
+  const container = document.getElementById('event-content');
+  if (loading) loading.classList.add('hidden');
+  if (!container) return;
+  container.classList.remove('hidden');
+  container.innerHTML = `
+    <div style="text-align: center; padding: 6rem 2rem; background: var(--card-bg); border-radius: 1.25rem; border: 1px dashed var(--border-color); margin: 2rem auto; max-width: 600px;">
+      <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.5rem;">Unable to Load Event</h2>
+      <p style="color: var(--text-muted); margin-bottom: 2rem;">Please go back and open the event again.</p>
+      <a href="#discover" class="btn btn-primary" style="display: inline-flex;">Back to Discover</a>
+    </div>
+  `;
 }
 
 function renderEvent(eventId) {
-  const events = JSON.parse(localStorage.getItem('uni_events') || '[]');
-  const ev = events.find(e => e.id === eventId);
   const container = document.getElementById('event-content');
+  const loading = document.getElementById('event-loading');
   if (!container) return;
+  container.classList.remove('hidden');
+  if (loading) loading.classList.add('hidden');
+
+  const events = getEvents();
+  const ev = events.find(e => e.id === eventId);
   if (!ev) {
     container.innerHTML = `
       <div style="text-align: center; padding: 6rem 2rem; background: var(--card-bg); border-radius: 1.25rem; border: 1px dashed var(--border-color); margin: 2rem auto; max-width: 600px;">
@@ -959,8 +1110,14 @@ function renderEvent(eventId) {
   }
 
   const dateStr = formatEventDateRange(ev.event_date);
-  const timeStr = (ev.start_time ? ev.start_time.slice(0,5) : '') + (ev.end_time ? ' - ' + ev.end_time.slice(0,5) : '');
+  const timeStr = formatEventTimeRange(ev.start_time, ev.end_time);
   const isRSVPd = hasRSVPd(eventId);
+  const category = escapeHTML(ev.category);
+  const title = escapeHTML(ev.title);
+  const description = escapeHTML(ev.description);
+  const venue = escapeHTML(ev.venue);
+  const platform = escapeHTML(ev.platform || 'Online');
+  const imageUrl = escapeHTML(ev.image_url);
 
   const locIcon = ev.location_type === 'online' 
     ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>` 
@@ -977,18 +1134,18 @@ function renderEvent(eventId) {
 
     <div style="display: grid; grid-template-columns: 1fr; gap: 2rem; align-items: start; max-width: 1000px; margin: 0 auto;">
       <div style="display: flex; flex-direction: column; gap: 1.5rem;">
-        <div style="aspect-ratio: 16/9; background: var(--hover-bg); border-radius: 1rem; overflow: hidden; position: relative;">
-          ${ev.image_url 
-            ? `<img src="${ev.image_url}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null; this.outerHTML='<div style=\\'width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--border-color);\\'><svg width=\\'64\\' height=\\'64\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'1.5\\'><rect x=\\'3\\' y=\\'3\\' width=\\'18\\' height=\\'18\\' rx=\\'2\\' ry=\\'2\\'></rect><circle cx=\\'8.5\\' cy=\\'8.5\\' r=\\'1.5\\'></circle><polyline points=\\'21 15 16 10 5 21\\'></polyline></svg></div>';">`
+          <div style="aspect-ratio: 16/9; background: var(--hover-bg); border-radius: 1rem; overflow: hidden; position: relative;">
+            ${ev.image_url 
+            ? `<img src="${imageUrl}" alt="${title}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null; this.outerHTML='<div style=\\'width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--border-color);\\'><svg width=\\'64\\' height=\\'64\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'1.5\\'><rect x=\\'3\\' y=\\'3\\' width=\\'18\\' height=\\'18\\' rx=\\'2\\' ry=\\'2\\'></rect><circle cx=\\'8.5\\' cy=\\'8.5\\' r=\\'1.5\\'></circle><polyline points=\\'21 15 16 10 5 21\\'></polyline></svg></div>';">`
             : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--border-color);"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></div>`}
         </div>
  
         <div>
           <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;">
-            <span class="badge badge-cat-${ev.category.toLowerCase()}">${ev.category}</span>
+            <span class="badge ${categoryBadgeClass(ev.category)}">${category}</span>
             ${ev.scorun > 0 ? `<span class="badge" style="background: var(--accent-glow); color: var(--accent); font-weight: 700;">${ev.scorun} SCORUN</span>` : ''}
           </div>
-          <h1 style="font-size: 2rem; font-weight: 800; color: var(--text-main); margin-bottom: 1.5rem; line-height: 1.2;">${ev.title}</h1>
+          <h1 style="font-size: 2rem; font-weight: 800; color: var(--text-main); margin-bottom: 1.5rem; line-height: 1.2;">${title}</h1>
           
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; padding: 1.5rem; background: var(--card-bg); border-radius: 1rem; border: 1px solid var(--border-color);">
             <div style="display: flex; gap: 1rem;">
@@ -1006,14 +1163,14 @@ function renderEvent(eventId) {
                 ${locIcon}
               </div>
               <div>
-                <div style="font-weight: 600; color: var(--text-main); margin-bottom: 0.15rem;">${ev.location_type === 'online' ? ev.platform : 'Location'}</div>
-                <div style="font-size: 0.85rem; color: var(--text-muted);">${ev.venue}</div>
+                <div style="font-weight: 600; color: var(--text-main); margin-bottom: 0.15rem;">${ev.location_type === 'online' ? platform : 'Location'}</div>
+                <div style="font-size: 0.85rem; color: var(--text-muted);">${venue}</div>
               </div>
             </div>
           </div>
  
           <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; color: var(--text-main);" data-i18n="about_event">About this event</h3>
-          <p style="color: var(--text-muted); line-height: 1.7; font-size: 1rem;">${ev.description}</p>
+          <p style="color: var(--text-muted); line-height: 1.7; font-size: 1rem;">${description}</p>
         </div>
       </div>
  
@@ -1057,7 +1214,7 @@ function toggleRSVP(eventId) {
 
   setTimeout(() => {
     let rsvps = JSON.parse(localStorage.getItem('uni_rsvps') || '[]');
-    let events = JSON.parse(localStorage.getItem('uni_events') || '[]');
+    let events = getEvents();
     const evIdx = events.findIndex(e => e.id === eventId);
     
     if (hasRSVPd(eventId)) {
@@ -1075,7 +1232,7 @@ function toggleRSVP(eventId) {
     }
     
     localStorage.setItem('uni_rsvps', JSON.stringify(rsvps));
-    localStorage.setItem('uni_events', JSON.stringify(events));
+    saveEvents(events);
     renderEvent(eventId);
   }, 500);
 }
@@ -1091,7 +1248,7 @@ function initMyEventsView() {
 }
 
 function loadMyEvents() {
-  const allEvents = JSON.parse(localStorage.getItem('uni_events') || '[]');
+  const allEvents = getEvents();
   const myEvents = allEvents.filter(e => e.requested_by === currentUser.id);
   const container = document.getElementById('my-events-list');
   if(!container) return;
@@ -1112,34 +1269,38 @@ function loadMyEvents() {
     if (ev.status === 'approved') { statusColor = '#10B981'; statusIcon = '<polyline points="20 6 9 17 4 12"></polyline>'; }
     else if (ev.status === 'rejected') { statusColor = '#EF4444'; statusIcon = '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>'; }
     else { statusColor = '#F59E0B'; statusIcon = '<circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>'; }
+    const category = escapeHTML(ev.category);
+    const title = escapeHTML(ev.title);
+    const venue = escapeHTML(ev.venue);
+    const status = escapeHTML(ev.status);
 
     return `
       <div class="card" style="padding: 1.5rem; display: flex; flex-direction: column;">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-          <span class="badge badge-cat-${ev.category.toLowerCase()}">${ev.category}</span>
+          <span class="badge ${categoryBadgeClass(ev.category)}">${category}</span>
           <div style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.8rem; font-weight: 600; color: ${statusColor}; background: ${statusColor}15; padding: 0.25rem 0.6rem; border-radius: 1rem;">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">${statusIcon}</svg>
-            ${ev.status.toUpperCase()}
+            ${status.toUpperCase()}
           </div>
         </div>
         
-        <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem; line-height: 1.3;"><a href="#event?id=${ev.id}" style="color: inherit; text-decoration: none;">${ev.title}</a></h3>
+        <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem; line-height: 1.3;"><a href="#event?id=${ev.id}" style="color: inherit; text-decoration: none;">${title}</a></h3>
         
         <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; font-size: 0.85rem; color: var(--text-muted);">
           <div style="display: flex; align-items: center; gap: 0.5rem;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-            ${formatEventDateRangeShort(ev.event_date)} &bull; ${ev.start_time.slice(0,5)}
+            ${formatEventDateRangeShort(ev.event_date)} &bull; ${formatEventTimeRange(ev.start_time, ev.end_time)}
           </div>
           <div style="display: flex; align-items: center; gap: 0.5rem;">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">${ev.venue}</span>
+            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">${venue}</span>
           </div>
         </div>
         
         ${ev.status === 'rejected' && ev.reject_reason ? `
           <div style="margin-top: auto; padding: 0.75rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 0.5rem; font-size: 0.8rem; color: #EF4444;">
             <strong style="display: block; margin-bottom: 0.25rem;">Admin Feedback:</strong>
-            ${ev.reject_reason}
+            ${escapeHTML(ev.reject_reason)}
           </div>
         ` : `<div style="margin-top: auto;"></div>`}
       </div>
@@ -1423,15 +1584,17 @@ document.addEventListener('click', (e) => {
 
 // --- EVENT DATE FORMATTING HELPERS ---
 function formatEventDateRange(dateStr) {
-  if (!dateStr) return '';
+  if (!dateStr) return 'Date TBA';
   if (!dateStr.includes(' to ')) {
     const dateObj = new Date(dateStr + 'T00:00:00');
+    if (Number.isNaN(dateObj.getTime())) return 'Date TBA';
     return dateObj.toLocaleDateString(currentLang === 'en' ? 'en-US' : 'ms-MY', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
   }
   
   const parts = dateStr.split(' to ');
   const startObj = new Date(parts[0] + 'T00:00:00');
   const endObj = new Date(parts[1] + 'T00:00:00');
+  if (Number.isNaN(startObj.getTime()) || Number.isNaN(endObj.getTime())) return 'Date TBA';
   
   const startDay = startObj.getDate();
   const endDay = endObj.getDate();
@@ -1452,15 +1615,17 @@ function formatEventDateRange(dateStr) {
 }
 
 function formatEventDateRangeShort(dateStr) {
-  if (!dateStr) return '';
+  if (!dateStr) return 'Date TBA';
   if (!dateStr.includes(' to ')) {
     const dateObj = new Date(dateStr + 'T00:00:00');
+    if (Number.isNaN(dateObj.getTime())) return 'Date TBA';
     return dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   }
   
   const parts = dateStr.split(' to ');
   const startObj = new Date(parts[0] + 'T00:00:00');
   const endObj = new Date(parts[1] + 'T00:00:00');
+  if (Number.isNaN(startObj.getTime()) || Number.isNaN(endObj.getTime())) return 'Date TBA';
   
   const startDay = startObj.getDate();
   const endDay = endObj.getDate();
@@ -1701,9 +1866,9 @@ function initSubmitView() {
         scorun: scorunVal
       };
 
-      const events = JSON.parse(localStorage.getItem('uni_events') || '[]');
+      const events = getEvents();
       events.push(newEvent);
-      localStorage.setItem('uni_events', JSON.stringify(events));
+      saveEvents(events);
 
       document.getElementById('submit-section').classList.add('hidden');
       document.getElementById('success-section').classList.remove('hidden');

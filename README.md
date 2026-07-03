@@ -6,6 +6,7 @@ A modern, premium Event Management prototype built entirely with HTML, CSS, and 
 
 - **Dark Mode Integration**: A flawless, completely customized Light and Dark mode system leveraging CSS Variables with smooth `pageFadeIn` transitions and no Flash of Unstyled Content (FOUC).
 - **No-Backend Architecture**: Uses `localStorage` as a mock JSON database. Includes auto-seed data and auto-migration scripts for zero-setup deployments.
+- **Editable Seed Data**: Default events live in `data/events.json`, making them easier to edit now and migrate into a real database later.
 - **Premium UI/UX**:
   - Custom scrollbars, glassmorphism navbars, and liquid CSS segment controls.
   - Interactive micro-animations (e.g., tactile `.btn:active` compressions and smooth hovers).
@@ -27,10 +28,16 @@ A modern, premium Event Management prototype built entirely with HTML, CSS, and 
 Since this is a prototype, there is no build step or backend to start. 
 
 1. Clone the repository.
-2. Open `index.html` in your browser (or serve the folder with any static file server).
+2. Serve the folder with any static file server, then open `index.html`.
 3. Browse events freely, or sign in with your role:
    - **Student / Committee** — Student ID + password
    - **Admin** — Email + password
+
+### Editing seed events
+
+Edit `data/events.json` to change the default events. Keep each event `id` stable so existing localStorage records can be refreshed from the JSON file.
+
+The app still uses `localStorage` as the runtime mock database for submitted events, approvals, registrations, and RSVP counts. Seed events from `data/events.json` are copied into localStorage on first load and refreshed by matching `id`.
 
 ### Demo credentials
 

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "1",
+    "title": "UNITEN Tech Hackathon 2026",
+    "category": "Competition",
+    "description": "Join the biggest 24-hour coding competition at UNITEN. Build innovative solutions for campus sustainability.",
+    "event_date": "2026-07-15",
+    "start_time": "09:00",
+    "end_time": "18:00",
+    "venue": "COIT Lab 1 & 2",
+    "image_url": "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&q=80&w=800",
+    "requested_by_name": "Tech Club",
+    "status": "approved",
+    "registrations": 45,
+    "scorun": 4
+  },
+  {
+    "id": "2",
+    "title": "Resume Building & Interview Skills Workshop",
+    "category": "Workshop",
+    "description": "Prepare for your internship! Learn how to craft a standout resume and ace your technical interviews with industry experts.",
+    "event_date": "2026-07-22",
+    "start_time": "14:00",
+    "end_time": "16:00",
+    "venue": "Library Auditorium",
+    "image_url": "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=800",
+    "requested_by_name": "Career Center",
+    "status": "approved",
+    "registrations": 120,
+    "scorun": 2
+  },
+  {
+    "id": "3",
+    "title": "Campus Mental Wellness Talk",
+    "category": "Talk",
+    "description": "A candid conversation about student mental health, stress management, and building resilience during exam season.",
+    "event_date": "2026-07-28",
+    "start_time": "10:00",
+    "end_time": "11:30",
+    "venue": "Dewan Utama",
+    "image_url": "https://images.unsplash.com/photo-1573497019418-b400bb3ab074?auto=format&fit=crop&q=80&w=800",
+    "requested_by_name": "Student Welfare Office",
+    "status": "approved",
+    "registrations": 78,
+    "scorun": 0
+  },
+  {
+    "id": "4",
+    "title": "SRC Committee Recruitment Interviews",
+    "category": "Hiring",
+    "description": "We are looking for passionate students to join the Student Representative Council (SRC) for the upcoming term. Sign up for your interview slot now!",
+    "event_date": "2026-07-20",
+    "start_time": "09:00",
+    "end_time": "17:00",
+    "venue": "Student Activity Center Meeting Room",
+    "image_url": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&q=80&w=800",
+    "requested_by_name": "Student Representative Council",
+    "status": "approved",
+    "registrations": 34,
+    "scorun": 1
+  }
+]
