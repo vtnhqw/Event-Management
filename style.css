@@ -1594,12 +1594,12 @@ h1, h2, h3, h4 {
 /* Modern Toast System */
 #toast-container {
   position: fixed;
-  bottom: 6.5rem;
+  bottom: 38rem; /* Positioned higher to ensure no overlap with the AI chat card */
   right: 2rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  z-index: 9999;
+  z-index: 20000;
   pointer-events: none;
 }
 
@@ -2655,6 +2655,7 @@ body.auth-page #view-login {
   flex-direction: column;
   gap: 0.85rem;
   background: var(--bg-color);
+  scroll-behavior: smooth;
 }
 
 .ai-chat-msg-wrapper {
@@ -2785,6 +2786,50 @@ body.auth-page #view-login {
 
 .typing-indicator .dot:nth-child(3) {
   animation-delay: 0.4s;
+}
+
+/* AI Chat Suggestions */
+.ai-chat-suggestions {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: var(--bg-color);
+  overflow-x: auto;
+  border-top: 1px dashed var(--border-color);
+  scrollbar-width: none; /* Hide scrollbar for clean visual */
+}
+
+.ai-chat-suggestions::-webkit-scrollbar {
+  display: none; /* Hide scrollbar for Safari/Chrome */
+}
+
+.ai-suggestion-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 9999px;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-main);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.2s, border-color 0.2s, transform 0.15s;
+  font-family: 'Inter', sans-serif;
+  box-shadow: var(--shadow-sm);
+}
+
+.ai-suggestion-chip:hover {
+  background: var(--hover-bg);
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.ai-suggestion-chip:active {
+  transform: translateY(0);
 }
 
 

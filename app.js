@@ -1918,6 +1918,7 @@ function renderNav() {
       </div>
     `;
     updateThemeIcon();
+    updateAIChatVisibility();
     return;
   }
   
@@ -1979,6 +1980,19 @@ function renderNav() {
   `;
   
   updateThemeIcon();
+  updateAIChatVisibility();
+}
+
+function updateAIChatVisibility() {
+  const widget = document.getElementById('ai-chat-widget');
+  if (!widget) return;
+  
+  if (!currentUser || currentUser.role === 'student') {
+    widget.style.display = 'block';
+  } else {
+    widget.style.display = 'none';
+    widget.classList.remove('chat-open');
+  }
 }
 
 // --- AI CHAT ASSISTANT ---
@@ -2022,6 +2036,15 @@ window.sendAIChatMessage = function() {
   const text = input.value.trim();
   if (!text) return;
   
+  // Disable input & send button to prevent spamming
+  input.disabled = true;
+  const sendBtn = document.querySelector('.ai-chat-send-btn');
+  if (sendBtn) sendBtn.disabled = true;
+  
+  // Hide suggestions container once conversation starts
+  const suggestions = document.getElementById('ai-chat-suggestions');
+  if (suggestions) suggestions.style.display = 'none';
+
   // Append User Message
   const userMsgHtml = `
     <div class="ai-chat-msg-wrapper user-msg">
@@ -2081,6 +2104,11 @@ window.sendAIChatMessage = function() {
     `;
     body.insertAdjacentHTML('beforeend', aiMsgHtml);
     body.scrollTop = body.scrollHeight;
+    
+    // Re-enable input and button
+    input.disabled = false;
+    if (sendBtn) sendBtn.disabled = false;
+    input.focus();
   }, 1000);
 };
 
@@ -2096,6 +2124,10 @@ window.resetAIChat = function() {
     </div>
   `;
   
+  // Show suggestions container again
+  const suggestions = document.getElementById('ai-chat-suggestions');
+  if (suggestions) suggestions.style.display = 'flex';
+  
   const input = document.getElementById('ai-chat-input');
   if (input) {
     input.value = '';
@@ -2104,5 +2136,13 @@ window.resetAIChat = function() {
   
   showToast('Chat restarted', 'info');
 };
+
+window.askAISuggestion = function(questionText) {
+  const input = document.getElementById('ai-chat-input');
+  if (!input) return;
+  input.value = questionText;
+  window.sendAIChatMessage();
+};
+
 
 
