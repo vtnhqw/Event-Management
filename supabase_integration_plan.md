@@ -114,6 +114,7 @@ EmailJS allows you to send emails directly from the browser without running any 
    <p>Your spot for <strong>{{event_title}}</strong> has been successfully confirmed!</p>
    <div style="border: 1px solid #E5E7EB; padding: 15px; border-radius: 8px; background: #FAFAF8;">
      <h4>🎟️ Ticket Details</h4>
+     <p><strong>Ticket ID:</strong> {{ticket_id}}</p>
      <p><strong>Date:</strong> {{event_date}}</p>
      <p><strong>Time:</strong> {{event_time}}</p>
      <p><strong>Venue:</strong> {{event_venue}}</p>

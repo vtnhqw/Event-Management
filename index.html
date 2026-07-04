@@ -6,7 +6,7 @@
   <script>if (localStorage.getItem('uni_theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>UNIEvent</title>
-  <link rel="stylesheet" href="style.css?v=toast-reposition">
+  <link rel="stylesheet" href="style.css?v=student-dashboard">
   <style>
     .page-view {
       display: none;
@@ -471,6 +471,20 @@
               <div id="rsvp-section"></div>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MY REGISTRATIONS VIEW -->
+    <section id="view-my-registrations" class="page-view">
+      <div class="main-content">
+        <div class="container max-w-7xl">
+          <div style="margin-bottom: 2rem;">
+            <h1 class="title" data-i18n="my_registrations_title">My Registrations</h1>
+            <p style="color: var(--text-muted); margin-top: 0.5rem; font-size: 1.125rem;" data-i18n="my_registrations_sub">Manage your upcoming event RSVPs and access your tickets</p>
+          </div>
+
+          <div id="my-registrations-list" class="grid grid-cols-1 grid-cols-2 grid-cols-3"></div>
         </div>
       </div>
     </section>
@@ -964,7 +978,7 @@
 
   <script src="config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="app.js?v=toast-reposition" defer></script>
+  <script src="app.js?v=student-dashboard" defer></script>
 </body>
 
 </html>

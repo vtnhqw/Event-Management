@@ -233,7 +233,7 @@ async function dbUpdateEventStatus(id, status, reason = null) {
   }
 }
 
-async function dbInsertRSVP(eventId, userId, email) {
+async function dbInsertRSVP(eventId, userId, email, ticketId) {
   if (supabaseClient) {
     try {
       const { error } = await supabaseClient
@@ -241,7 +241,8 @@ async function dbInsertRSVP(eventId, userId, email) {
         .insert([{
           event_id: eventId,
           user_id: userId,
-          email: email
+          email: email,
+          ticket_id: ticketId
         }]);
       if (error) throw error;
     } catch (e) {
@@ -265,7 +266,7 @@ async function dbDeleteRSVP(eventId, userId) {
   }
 }
 
-async function sendConfirmationEmail(toEmail, event) {
+async function sendConfirmationEmail(toEmail, event, ticketId) {
   if (!toEmail || typeof CONFIG === 'undefined' || !CONFIG.EMAILJS_SERVICE_ID || !CONFIG.EMAILJS_TEMPLATE_ID || !CONFIG.EMAILJS_PUBLIC_KEY || CONFIG.EMAILJS_SERVICE_ID === 'YOUR_EMAILJS_SERVICE_ID') {
     console.warn("EmailJS credentials not configured. Skipping confirmation email.");
     return;
@@ -278,7 +279,8 @@ async function sendConfirmationEmail(toEmail, event) {
     event_date: formatEventDateRange(event.event_date),
     event_time: formatEventTimeRange(event.start_time, event.end_time),
     event_venue: event.venue,
-    event_scorun: event.scorun
+    event_scorun: event.scorun,
+    ticket_id: ticketId
   };
 
   try {
@@ -314,8 +316,9 @@ const SEED_USERS = [
 
 const TRANSLATIONS = {
   en: {
-    nav_submit: "Submit Event", nav_my_events: "My Events", nav_admin: "Admin Dashboard", nav_logout: "Logout",
+    nav_submit: "Submit Event", nav_my_events: "My Events", nav_admin: "Admin Dashboard", nav_logout: "Logout", nav_my_registrations: "My Registrations",
     role_student: "STUDENT", role_committee: "COMMITTEE", role_admin: "ADMIN",
+    my_registrations_title: "My Registrations", my_registrations_sub: "Manage your upcoming event RSVPs and access your tickets",
     discover_title: "Discover Events", discover_subtitle: "Find and join what's happening at UNITEN",
     filter_all: "All Events", browse_category: "Browse by Category", filter_workshop: "Workshop", filter_competition: "Competition", filter_talk: "Talk", filter_social: "Social", filter_sports: "Sports", filter_hiring: "Hiring", filter_other: "Other",
     all_caught_up: "All caught up!", no_pending_events: "There are no events waiting for approval.", max_participants: "Max Participants",
@@ -341,8 +344,9 @@ const TRANSLATIONS = {
     ai_chat_placeholder: "Type a message..."
   },
   my: {
-    nav_submit: "Hantar Acara", nav_my_events: "Acara Saya", nav_admin: "Papan Pemuka Admin", nav_logout: "Log Keluar",
+    nav_submit: "Hantar Acara", nav_my_events: "Acara Saya", nav_admin: "Papan Pemuka Admin", nav_logout: "Log Keluar", nav_my_registrations: "Pendaftaran Saya",
     role_student: "PELAJAR", role_committee: "JAWATANKUASA", role_admin: "ADMIN",
+    my_registrations_title: "Pendaftaran Saya", my_registrations_sub: "Urus slot pendaftaran anda dan lihat tiket anda",
     discover_title: "Teroka Acara", discover_subtitle: "Cari dan sertai aktiviti di UNITEN",
     filter_all: "Semua Acara", browse_category: "Layari mengikut Kategori", filter_workshop: "Bengkel", filter_competition: "Pertandingan", filter_talk: "Ceramah", filter_social: "Sosial", filter_sports: "Sukan", filter_hiring: "Pengambilan", filter_other: "Lain-lain",
     all_caught_up: "Semua selesai!", no_pending_events: "Tiada acara menunggu kelulusan.", max_participants: "Peserta Maksimum",
@@ -619,7 +623,7 @@ function showToast(message, type = 'success') {
 }
 
 // --- ROUTING SYSTEM ---
-const PROTECTED_ROUTES = ['admin', 'submit', 'my-events'];
+const PROTECTED_ROUTES = ['admin', 'submit', 'my-events', 'my-registrations'];
 
 const routes = {
   '': initDiscoverView,
@@ -628,7 +632,8 @@ const routes = {
   '#admin': initAdminView,
   '#event': initEventView,
   '#my-events': initMyEventsView,
-  '#submit': initSubmitView
+  '#submit': initSubmitView,
+  '#my-registrations': initMyRegistrationsView
 };
 
 function router() {
@@ -1642,14 +1647,20 @@ function toggleRSVP(eventId) {
         showToast('Registration cancelled', 'info');
         dbDeleteRSVP(eventId, currentUser.id);
       } else {
-        rsvps.push({ event_id: eventId, user_id: currentUser.id, timestamp: new Date().toISOString() });
+        const ticketId = 'TK-' + Math.floor(100000 + Math.random() * 900000);
+        rsvps.push({ 
+          event_id: eventId, 
+          user_id: currentUser.id, 
+          timestamp: new Date().toISOString(),
+          ticket_id: ticketId 
+        });
         if (evIdx !== -1) {
           events[evIdx].registrations = (events[evIdx].registrations || 0) + 1;
         }
         showToast('Successfully registered for event!');
-        dbInsertRSVP(eventId, currentUser.id, email || '');
+        dbInsertRSVP(eventId, currentUser.id, email || '', ticketId);
         if (evIdx !== -1 && email) {
-          sendConfirmationEmail(email, events[evIdx]);
+          sendConfirmationEmail(email, events[evIdx], ticketId);
         }
       }
       
@@ -1710,6 +1721,108 @@ window.deleteEvent = async function(eventId) {
   } else {
     window.location.hash = '#discover';
   }
+};
+
+// --- MY REGISTRATIONS VIEW (STUDENT DASHBOARD) ---
+function initMyRegistrationsView() {
+  if (!checkAuth()) return;
+  if (currentUser.role !== 'student') {
+    window.location.hash = '#discover';
+    return;
+  }
+  loadMyRegistrations();
+}
+
+function loadMyRegistrations() {
+  const rsvps = JSON.parse(localStorage.getItem('uni_rsvps') || '[]');
+  const myRSVPs = rsvps.filter(r => r.user_id === currentUser.id);
+  const events = getEvents();
+  const container = document.getElementById('my-registrations-list');
+  if (!container) return;
+
+  if (myRSVPs.length === 0) {
+    container.innerHTML = `
+      <div style="grid-column: 1 / -1; padding: 4rem 1rem; text-align: center; background: var(--card-bg); border-radius: 1.25rem; border: 1px dashed var(--border-color);">
+        <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem;" data-i18n="no_registrations">No Registered Events</h3>
+        <p style="color: var(--text-muted); font-size: 0.95rem;" data-i18n="no_registrations_sub">You haven't registered for any events yet.</p>
+        <a href="#discover" class="btn btn-primary" style="margin-top: 1.5rem;" data-i18n="browse_events">Browse Events</a>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = myRSVPs.map(r => {
+    const ev = events.find(e => e.id === r.event_id);
+    if (!ev) return '';
+
+    const category = escapeHTML(ev.category);
+    const title = escapeHTML(ev.title);
+    const venue = escapeHTML(ev.venue);
+    const ticketId = escapeHTML(r.ticket_id || 'TK-PENDING');
+
+    return `
+      <div class="card animate-in" style="padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between;">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+            <span class="badge ${categoryBadgeClass(ev.category)}">${category}</span>
+            <div style="font-size: 0.75rem; font-weight: 700; background: rgba(59, 130, 246, 0.1); color: #3B82F6; padding: 0.25rem 0.6rem; border-radius: 0.5rem; letter-spacing: 0.05em;">
+              🎫 ${ticketId}
+            </div>
+          </div>
+          
+          <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.5rem; line-height: 1.3;">
+            <a href="#event?id=${ev.id}" style="color: inherit; text-decoration: none;">${title}</a>
+          </h3>
+          
+          <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem; font-size: 0.85rem; color: var(--text-muted);">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              ${formatEventDateRangeShort(ev.event_date)} &bull; ${formatEventTimeRange(ev.start_time, ev.end_time)}
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+              <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">${venue}</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem; color: var(--amber); font-weight: 600;">
+              ⚡ ${ev.scorun} SCORUN Point${ev.scorun > 1 ? 's' : ''}
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+          <a href="#event?id=${ev.id}" class="btn btn-outline" style="flex: 1; font-size: 0.8rem; justify-content: center; padding: 0.5rem;">
+            View Event
+          </a>
+          <button onclick="cancelRegistrationFromDashboard('${ev.id}')" class="btn" style="flex: 1; font-size: 0.8rem; justify-content: center; background: rgba(239, 68, 68, 0.1); color: #EF4444; border: none; padding: 0.5rem; font-weight: 600;">
+            Cancel Spot
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+  applyLang();
+}
+
+window.cancelRegistrationFromDashboard = async function(eventId) {
+  const confirmMsg = currentLang === 'en'
+    ? 'Are you sure you want to cancel your spot for this event?'
+    : 'Adakah anda pasti mahu membatalkan slot anda untuk acara ini?';
+  if (!confirm(confirmMsg)) return;
+
+  let rsvps = JSON.parse(localStorage.getItem('uni_rsvps') || '[]');
+  rsvps = rsvps.filter(r => !(r.event_id === eventId && r.user_id === currentUser.id));
+  localStorage.setItem('uni_rsvps', JSON.stringify(rsvps));
+
+  let events = getEvents();
+  const evIdx = events.findIndex(e => e.id === eventId);
+  if (evIdx !== -1) {
+    events[evIdx].registrations = Math.max(0, (events[evIdx].registrations || 0) - 1);
+    saveEvents(events);
+  }
+
+  showToast('Registration cancelled', 'info');
+  dbDeleteRSVP(eventId, currentUser.id);
+  loadMyRegistrations();
 };
 
 // --- MY EVENTS VIEW ---
@@ -2418,6 +2531,10 @@ function renderNav() {
   };
 
   let links = `<a href="#discover" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg><div class="i18n-grid"><span data-i18n="discover_title">Discover Events</span><span class="hidden-longest">Discover Events</span></div></a>`;
+  
+  if (currentUser.role === 'student') {
+    links += `<a href="#my-registrations" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg><div class="i18n-grid"><span data-i18n="nav_my_registrations">My Registrations</span><span class="hidden-longest">Pendaftaran Saya</span></div></a>`;
+  }
   
   if (currentUser.role === 'committee') {
     links += `<a href="#submit" class="nav-link"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg><div class="i18n-grid"><span data-i18n="nav_submit">Submit Event</span><span class="hidden-longest">Hantar Acara</span></div></a>`;
