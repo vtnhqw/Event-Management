@@ -981,12 +981,12 @@ h1, h2, h3, h4 {
 
 .dropdown-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 0.5rem;
 }
-@media (max-width: 640px) {
+@media (min-width: 641px) {
   .dropdown-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
@@ -2992,4 +2992,72 @@ body.auth-page #view-login {
   filter: brightness(1.1);
 }
 
+
+
+
+/* ==========================================================================
+   MOBILE-FIRST & IOS SAFARI RESPONSIVE QUIRKS (AI RULESET FIXES)
+   ========================================================================== */
+
+/* iOS momentum scrolling, safe areas, highlight flash */
+html, body {
+  -webkit-overflow-scrolling: touch;
+  -webkit-tap-highlight-color: transparent;
+  overflow-wrap: break-word; /* Ensure long URLs/words wrap */
+}
+
+/* Base safe area padding for notch/dynamic island */
+body {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.navbar, .nav-container {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* Viewport height quirk fix */
+.main-content, .auth-split-layout {
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+
+/* Ensure images never overflow and scale smoothly */
+img, video, iframe, canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Form inputs: prevent iOS auto-zoom by forcing >=16px */
+input, select, textarea, .form-control, .luma-list-input, .luma-huge-input, .luma-form-panel input {
+  font-size: 16px !important;
+}
+
+/* Ensure minimal tap targets (44px/48px) */
+button, .btn, .nav-link, .nav-icon-btn, .filter-pill, .month-option, .dropdown-trigger, .category-card, .auth-role-btn {
+  min-height: 44px;
+}
+
+/* Form layouts on small screens */
+@media (max-width: 360px) {
+  /* Prevent horizontal scroll at 360px */
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  .grid-cols-2, .grid-cols-3 {
+    grid-template-columns: 1fr !important; /* Stack completely */
+  }
+}
+
+/* Fix flex/gap fallback and responsiveness for the event detail */
+.datetime-wrap-panel {
+  flex-wrap: wrap;
+}
+
+/* Convert sticky fixed positions near bottom to respect safe area */
+#toast {
+  bottom: calc(2rem + env(safe-area-inset-bottom));
+}
 
