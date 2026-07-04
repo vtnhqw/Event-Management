@@ -1,0 +1,21 @@
+{
+  "name": "UNITEN Event",
+  "short_name": "UNIEvent",
+  "description": "Discover and manage events at UNITEN.",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#FAFAF8",
+  "theme_color": "#0F1B3C",
+  "icons": [
+    {
+      "src": "favicon.png",
+      "sizes": "64x64",
+      "type": "image/png"
+    },
+    {
+      "src": "logo_icon_only.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

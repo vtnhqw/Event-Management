@@ -3061,3 +3061,19 @@ button, .btn, .nav-link, .nav-icon-btn, .filter-pill, .month-option, .dropdown-t
   bottom: calc(2rem + env(safe-area-inset-bottom));
 }
 
+
+/* ==========================================================================
+   ACCESSIBILITY & UI IMPROVEMENTS
+   ========================================================================== */
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, .nav-link:focus-visible {
+  outline: 3px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--border-color) 25%, var(--card-bg) 50%, var(--border-color) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 0.5rem;
+  min-height: 20px;
+}

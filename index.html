@@ -5,7 +5,15 @@
   <meta charset="UTF-8">
   <script>if (localStorage.getItem('uni_theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>UNIEvent</title>
+  <title>UNITEN Event</title>
+  <meta name="description" content="Discover and manage events at UNITEN. Join clubs, workshops, and sports.">
+  <meta property="og:title" content="UNITEN Event">
+  <meta property="og:description" content="Discover and manage events at UNITEN. Join clubs, workshops, and sports.">
+  <meta property="og:image" content="logo_icon_only.png">
+  <meta property="og:type" content="website">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0F1B3C">
+  <link rel="icon" type="image/png" href="favicon.png?v=4">
   <link rel="stylesheet" href="style.css?v=student-dashboard">
   <style>
     .page-view {
@@ -201,19 +209,19 @@
             <div class="auth-carousel-track">
               <!-- Slide 1 -->
               <div class="auth-slide">
-                <img src="auth-hero.png" alt="UNIEvent" class="auth-left-img">
+                <img src="auth-hero.png" alt="UNITEN Event" class="auth-left-img" loading="lazy">
                 <h2 class="auth-left-heading">Discover campus events &amp; enjoy the best social life</h2>
                 <p class="auth-left-sub">Join thousands of students at UNITEN finding clubs, workshops, sports, and more — all in one place.</p>
               </div>
               <!-- Slide 2 -->
               <div class="auth-slide">
-                <img src="auth-hero-2.jpg" alt="UNIEvent" class="auth-left-img">
+                <img src="auth-hero-2.jpg" alt="UNITEN Event" class="auth-left-img" loading="lazy">
                 <h2 class="auth-left-heading">Boost your skills at student workshops</h2>
                 <p class="auth-left-sub">Learn coding, design, career prep, and more from industry professionals and peers.</p>
               </div>
               <!-- Slide 3 -->
               <div class="auth-slide">
-                <img src="auth-hero-3.jpg" alt="UNIEvent" class="auth-left-img">
+                <img src="auth-hero-3.jpg" alt="UNITEN Event" class="auth-left-img" loading="lazy">
                 <h2 class="auth-left-heading">Find your team in sports &amp; clubs</h2>
                 <p class="auth-left-sub">From friendly tournaments to weekly meetups, stay active and build lifelong connections.</p>
               </div>
@@ -345,7 +353,7 @@
       </div>
 
       <!-- Footer -->
-      <footer class="auth-page-footer">UNIEvent Prototype &copy; 2026 &middot; All rights reserved.</footer>
+      <footer class="auth-page-footer">UNITEN Event Prototype &copy; 2026 &middot; All rights reserved.</footer>
     </section>
 
     <!-- ADMIN VIEW -->
@@ -883,7 +891,7 @@
     </section>
 
   </div>
-  <footer id="global-footer" class="site-footer">UNIEvent Prototype &copy; 2026. All rights reserved.</footer>
+  <footer id="global-footer" class="site-footer">UNITEN Event Prototype &copy; 2026. All rights reserved.</footer>
 
   <!-- AI CHAT ASSISTANT WIDGET -->
   <div class="ai-chat-widget" id="ai-chat-widget" style="display: none;">
@@ -907,7 +915,7 @@
             </svg>
           </div>
           <div>
-            <div class="ai-chat-title">UNIEvent AI</div>
+            <div class="ai-chat-title">UNITEN Event AI</div>
             <div class="ai-chat-status">
               <span class="status-dot"></span>
               Online Assistant
@@ -936,7 +944,7 @@
       <div class="ai-chat-body" id="ai-chat-body">
         <div class="ai-chat-msg-wrapper ai-msg">
           <div class="ai-chat-msg" data-i18n="ai_chat_welcome">
-            Hi there! 👋 I'm your UNIEvent AI Assistant. Ask me anything about events, SCORUN points, registration, or how to submit your own event!
+            Hi there! 👋 I'm your UNITEN Event AI Assistant. Ask me anything about events, SCORUN points, registration, or how to submit your own event!
           </div>
         </div>
       </div>
@@ -979,6 +987,18 @@
   <script src="config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
   <script src="app.js?v=student-dashboard" defer></script>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then(reg => {
+          console.log('SW registered: ', reg.scope);
+        }).catch(err => {
+          console.log('SW registration failed: ', err);
+        });
+      });
+    }
+  </script>
 </body>
 
 </html>

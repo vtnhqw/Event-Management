@@ -338,7 +338,7 @@ const TRANSLATIONS = {
     lbl_location_type: "Location Type", loc_physical: "Physical", loc_online: "Online", lbl_platform: "Online Platform", platform_other: "Other",
     filter_month_all: "All Months", month_01: "January", month_02: "February", month_03: "March", month_04: "April", month_05: "May", month_06: "June", month_07: "July", month_08: "August", month_09: "September", month_10: "October", month_11: "November", month_12: "December",
     lbl_date_start: "Date & Start", add_location: "Add Event Location", ph_offline: "e.g. Offline location", ph_virtual: "Platform", add_desc: "Add Description", ph_desc: "Offline location or virtual link", event_options: "Event Options", require_approval: "Require Approval", scorun_points: "SCORUN Points", btn_create_event: "Create Event", submit_success_title: "Submitted successfully", submit_success_sub: "Your event is now awaiting admin approval.", ph_event_name: "Event Name", card_going: "going", card_view: "View &rarr;", image_url_notice: "We only accept online image URLs. Direct image file uploads are not supported.", btn_back: "Back to Events", btn_cancel_register: "Cancel Registration", admin_bypass: "Admins bypass approval", btn_processing: "Processing...",
-    ai_chat_welcome: "Hi there! 👋 I'm your UNIEvent AI Assistant. Ask me anything about events, SCORUN points, registration, or how to submit your own event!",
+    ai_chat_welcome: "Hi there! 👋 I'm your UNITEN Event AI Assistant. Ask me anything about events, SCORUN points, registration, or how to submit your own event!",
     ai_chat_suggest_1: "How to register?",
     ai_chat_suggest_2: "What is SCORUN?",
     ai_chat_placeholder: "Type a message..."
@@ -366,7 +366,7 @@ const TRANSLATIONS = {
     lbl_location_type: "Jenis Lokasi", loc_physical: "Fizikal", loc_online: "Dalam Talian", lbl_platform: "Platform Dalam Talian", platform_other: "Lain-lain",
     filter_month_all: "Semua Bulan", month_01: "Januari", month_02: "Februari", month_03: "Mac", month_04: "April", month_05: "Mei", month_06: "Jun", month_07: "Julai", month_08: "Ogos", month_09: "September", month_10: "Oktober", month_11: "November", month_12: "Disember",
     lbl_date_start: "Tarikh & Mula", add_location: "Tambah Lokasi Acara", ph_offline: "cth. Lokasi fizikal", ph_virtual: "Platform", add_desc: "Tambah Penerangan", ph_desc: "Lokasi fizikal atau pautan maya", event_options: "Pilihan Acara", require_approval: "Perlukan Kelulusan", scorun_points: "Mata SCORUN", btn_create_event: "Cipta Acara", submit_success_title: "Dihantar dengan berjaya", submit_success_sub: "Acara anda kini menunggu kelulusan admin.", ph_event_name: "Nama Acara", card_going: "hadir", card_view: "Lihat &rarr;", image_url_notice: "Kami hanya menerima URL gambar dalam talian. Muat naik fail gambar secara langsung tidak disokong.", btn_back: "Kembali ke Acara", btn_cancel_register: "Batal Pendaftaran", admin_bypass: "Admin mengecualikan kelulusan", btn_processing: "Memproses...",
-    ai_chat_welcome: "Hai di sana! 👋 Saya Pembantu AI UNIEvent anda. Tanya saya apa-apa tentang acara, mata SCORUN, pendaftaran, atau cara menghantar acara anda sendiri!",
+    ai_chat_welcome: "Hai di sana! 👋 Saya Pembantu AI UNITEN Event anda. Tanya saya apa-apa tentang acara, mata SCORUN, pendaftaran, atau cara menghantar acara anda sendiri!",
     ai_chat_suggest_1: "Bagaimana cara mendaftar?",
     ai_chat_suggest_2: "Apakah itu SCORUN?",
     ai_chat_placeholder: "Tulis mesej..."
@@ -920,7 +920,7 @@ function renderEvents() {
         <a href="#event?id=${event.id}" class="card animate-in" style="animation-delay: ${index * 0.05}s; opacity: 0; display: block; text-decoration: none;">
           <div class="event-img-wrapper">
             ${event.image_url 
-              ? `<img src="${imageUrl}" alt="${title}" class="event-img" onerror="this.onerror=null; this.outerHTML='<div class=\\'event-img event-img-placeholder\\'><svg width=\\'40\\' height=\\'40\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'1.5\\' stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\'><rect x=\\'3\\' y=\\'3\\' width=\\'18\\' height=\\'18\\' rx=\\'2\\' ry=\\'2\\'></rect><circle cx=\\'8.5\\' cy=\\'8.5\\' r=\\'1.5\\'></circle><polyline points=\\'21 15 16 10 5 21\\'></polyline></svg></div>';">` 
+              ? `<img src="${imageUrl}" alt="${title}" class="event-img" loading="lazy" onerror="this.onerror=null; this.outerHTML='<div class=\\'event-img event-img-placeholder\\'><svg width=\\'40\\' height=\\'40\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'1.5\\' stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\'><rect x=\\'3\\' y=\\'3\\' width=\\'18\\' height=\\'18\\' rx=\\'2\\' ry=\\'2\\'></rect><circle cx=\\'8.5\\' cy=\\'8.5\\' r=\\'1.5\\'></circle><polyline points=\\'21 15 16 10 5 21\\'></polyline></svg></div>';">` 
               : `<div class="event-img event-img-placeholder"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></div>`}
           </div>
           <div class="event-content">
@@ -1208,7 +1208,7 @@ function renderPending(events) {
             <span>${venue}</span>
           </div>
         </div>
-        ${ev.image_url ? `<img src="${imageUrl}" alt="${title}" style="width: 56px; height: 56px; border-radius: 0.5rem; object-fit: cover; flex-shrink: 0;">` : ''}
+        ${ev.image_url ? `<img loading="lazy" src="${imageUrl}" alt="${title}" style="width: 56px; height: 56px; border-radius: 0.5rem; object-fit: cover; flex-shrink: 0;">` : ''}
       </div>
       <p style="font-size: 0.875rem; color: var(--text-muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.6;">${description}</p>
       
@@ -1430,7 +1430,7 @@ function renderEvent(eventId) {
       <div class="event-main-col">
         <div class="event-hero-wrapper animate-in" style="aspect-ratio: 16/9; background: var(--hover-bg); border-radius: 1rem; overflow: hidden; position: relative; opacity: 0; animation-delay: 0.05s;">
           ${ev.image_url 
-            ? `<img src="${imageUrl}" alt="${title}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null; this.outerHTML='<div style=\\'width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--border-color);\\'><svg width=\\'64\\' height=\\'64\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'1.5\\'><rect x=\\'3\\' y=\\'3\\' width=\\'18\\' height=\\'18\\' rx=\\'2\\' ry=\\'2\\'></rect><circle cx=\\'8.5\\' cy=\\'8.5\\' r=\\'1.5\\'></circle><polyline points=\\'21 15 16 10 5 21\\'></polyline></svg></div>';">`
+            ? `<img loading="lazy" src="${imageUrl}" alt="${title}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null; this.outerHTML='<div style=\\'width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--border-color);\\'><svg width=\\'64\\' height=\\'64\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'currentColor\\' stroke-width=\\'1.5\\'><rect x=\\'3\\' y=\\'3\\' width=\\'18\\' height=\\'18\\' rx=\\'2\\' ry=\\'2\\'></rect><circle cx=\\'8.5\\' cy=\\'8.5\\' r=\\'1.5\\'></circle><polyline points=\\'21 15 16 10 5 21\\'></polyline></svg></div>';">`
             : `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--border-color);"><svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></div>`}
         </div>
  
@@ -2503,7 +2503,10 @@ function renderNav() {
     container.innerHTML = `
       <div class="nav-container">
         <div style="display: flex; align-items: center; gap: 2.5rem; height: 100%;">
-          <a href="#discover" class="nav-brand">UNI<span>Event</span></a>
+          <a href="#discover" class="nav-brand" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none;">
+          <img loading="lazy" src="logo_icon_only.png?v=1" alt="Logo" style="height: 32px; width: auto; object-fit: contain;">
+          <span>UNITEN <span>Event</span></span>
+        </a>
         </div>
         <div class="nav-right" style="display: flex; align-items: center; gap: 0.25rem;">
           <button id="lang-toggle-btn" class="nav-icon-btn" style="font-weight: 700; font-size: 0.9rem;" onclick="toggleLang()">${currentLang.toUpperCase()}</button>
@@ -2548,7 +2551,10 @@ function renderNav() {
   container.innerHTML = `
     <div class="nav-container">
       <div style="display: flex; align-items: center; gap: 2.5rem; height: 100%;">
-        <a href="#discover" class="nav-brand">UNI<span>Event</span></a>
+        <a href="#discover" class="nav-brand" style="display: flex; align-items: center; gap: 0.5rem; text-decoration: none;">
+          <img loading="lazy" src="logo_icon_only.png?v=1" alt="Logo" style="height: 32px; width: auto; object-fit: contain;">
+          <span>UNITEN <span>Event</span></span>
+        </a>
         <div class="nav-links">${links}</div>
       </div>
       <div class="nav-right" style="display: flex; align-items: center; gap: 0.25rem;">
@@ -2724,7 +2730,7 @@ window.sendAIChatMessage = function() {
       } else if (lowerText.includes('category') || lowerText.includes('kategori') || lowerText.includes('type')) {
         aiResponse = "Kami mempunyai beberapa kategori acara: **Bengkel, Pertandingan, Ceramah, Perjumpaan Sosial, Sukan, Pengambilan Pekerja, dan Lain-lain**. Anda boleh melayari kategori tersebut menggunakan grid penapis di halaman Teroka!";
       } else if (lowerText.includes('hello') || lowerText.includes('hi') || lowerText.includes('hey') || lowerText.includes('assalamualaikum')) {
-        aiResponse = "Hello! 👋 Bagaimana saya boleh membantu anda dengan UNIEvent hari ini?";
+        aiResponse = "Hello! 👋 Bagaimana saya boleh membantu anda dengan UNITEN Event hari ini?";
       } else if (lowerText.includes('thank') || lowerText.includes('tq') || lowerText.includes('terima kasih')) {
         aiResponse = "Sama-sama! Beritahu saya jika anda memerlukan bantuan lain. 😊";
       }
@@ -2742,7 +2748,7 @@ window.sendAIChatMessage = function() {
       } else if (lowerText.includes('category') || lowerText.includes('kategori') || lowerText.includes('type')) {
         aiResponse = "We have several event categories: **Workshops, Competitions, Talks, Social gatherings, Sports, Hiring drives, and Others**. You can browse them using the filter grid on the Discover page!";
       } else if (lowerText.includes('hello') || lowerText.includes('hi') || lowerText.includes('hey') || lowerText.includes('assalamualaikum')) {
-        aiResponse = "Hello! 👋 How can I assist you with UNIEvent today?";
+        aiResponse = "Hello! 👋 How can I assist you with UNITEN Event today?";
       } else if (lowerText.includes('thank') || lowerText.includes('tq') || lowerText.includes('terima kasih')) {
         aiResponse = "You're very welcome! Let me know if you need anything else. 😊";
       }
@@ -2771,7 +2777,7 @@ window.resetAIChat = function() {
   if (!body) return;
   
   const translations = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
-  const welcomeText = translations.ai_chat_welcome || "Hi there! 👋 I'm your UNIEvent AI Assistant. Ask me anything about events, SCORUN points, registration, or how to submit your own event!";
+  const welcomeText = translations.ai_chat_welcome || "Hi there! 👋 I'm your UNITEN Event AI Assistant. Ask me anything about events, SCORUN points, registration, or how to submit your own event!";
   
   body.innerHTML = `
     <div class="ai-chat-msg-wrapper ai-msg">
