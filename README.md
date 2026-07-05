@@ -64,3 +64,5 @@ The app still uses `localStorage` as the runtime mock database for submitted eve
 - **SCORUN Integration**: Supports the university SCORUN points system directly on event cards, details, and the AI chatbot helper.
 - **Collision Prevention**: To prevent visual overlap between the Floating AI widget and popup notifications, toast notifications are offset to `bottom: 38rem` (floating cleanly above the chat card header) with elevated `z-index: 20000;`.
 - **Performance**: Removed global universal selector transitions (`* { transition... }`) in favor of explicitly scoped micro-animations to ensure 60fps scrolling even with complex backdrop-filters.
+
+
